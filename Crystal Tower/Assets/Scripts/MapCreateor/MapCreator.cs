@@ -67,7 +67,7 @@ public class MapCreator : MonoBehaviour
                 // Åu1ÅvÇÃâ”èäÇ…è∞ê∂ê¨
                 if (mapData[x, y] == 1)
                 {
-                    GameObject obj = Instantiate(floorPrefab, new Vector3(x, y, 0), new Quaternion());
+                    GameObject obj = Instantiate(floorPrefab, new Vector3(x, y, 1), new Quaternion());
                     obj.transform.parent = this.transform;
                 }
             }
@@ -87,7 +87,21 @@ public class MapCreator : MonoBehaviour
      */
     private void SpawnPlayer()
     {
+        Debug.Log("START SpawnPlayer");
+        if (!this.playerObject)
+        {
+            Debug.Log("player object is null.");
+            return;
+        }
 
+        Position spawn;
+        do
+        {
+            spawn = new Position(RogueUtils.GetRandomInt(0, MapSizeX - 1), RogueUtils.GetRandomInt(0, MapSizeY - 1));
+        } while (this.mapData[spawn.X, spawn.Y] != 1);
+
+        this.playerObject.transform.position = new Vector3(spawn.X, spawn.Y, 0);
+        this.playerPosition = spawn;
     }
 
     /**
