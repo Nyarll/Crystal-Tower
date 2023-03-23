@@ -35,6 +35,11 @@ public class MapCreator : MonoBehaviour
 
     private MapGenerator generator = null;
 
+    public Tile[,] GetMapData()
+    {
+        return this.mapData;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -131,6 +136,7 @@ public class MapCreator : MonoBehaviour
 
         this.playerObject.transform.position = new Vector3(spawn.X, spawn.Y, 0);
         this.playerPosition = spawn;
+        this.playerObject.GetComponent<Player>().SetMapData(this.mapData);
     }
 
     /**
