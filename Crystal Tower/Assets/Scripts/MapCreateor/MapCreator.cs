@@ -20,9 +20,9 @@ public class MapCreator : MonoBehaviour
     [SerializeField]
     GameObject playerObject;
 
-    // è∞
+    // É^ÉCÉã
     [SerializeField]
-    GameObject floorPrefab;
+    GameObject tilePrefab;
 
     // äKíi
     [SerializeField]
@@ -75,11 +75,30 @@ public class MapCreator : MonoBehaviour
         {
             for (int x = 0; x < this.MapSizeX; x++)
             {
-                // WallÇ≈ÇÕÇ»Ç¢â”èäÇ…è∞ê∂ê¨
-                if (this.mapData[x, y].GetType() != TileType.Wall)
+                if (this.mapData[x, y].GetType() != TileType.None)
                 {
-                    GameObject obj = Instantiate(floorPrefab, new Vector3(x, y, 1), new Quaternion());
+                    GameObject obj = Instantiate(tilePrefab, new Vector3(x, y, 1), new Quaternion());
                     obj.transform.parent = this.transform;
+                    SpriteRenderer sprite = obj.GetComponent<SpriteRenderer>();
+
+                    switch (this.mapData[x, y].GetType())
+                    {
+                        case TileType.Wall:
+                            sprite.color = new Color32(64, 32, 0, 255);
+                            break;
+
+                        case TileType.Room:
+                            sprite.color = new Color32(128, 255, 255, 255);
+                            break;
+
+                        case TileType.Pass:
+                            sprite.color = new Color32(192, 192, 255, 255);
+                            break;
+
+                        default:
+                            sprite.color = new Color32(255, 0, 255, 255);
+                            break;
+                    }
                 }
             }
         }

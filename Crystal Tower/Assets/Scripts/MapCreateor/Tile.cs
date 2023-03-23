@@ -4,6 +4,7 @@ using UnityEngine;
 
 public enum TileType
 {
+    None = (-1),    // なし
     Wall,   // 壁のタイル
     Room,   // 部屋のタイル
     Pass    // 通路のタイル

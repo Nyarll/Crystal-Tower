@@ -403,7 +403,7 @@ MonoBehaviour:
   MapSizeY: 64
   MaxRoom: 14
   playerObject: {fileID: 247956816}
-  floorPrefab: {fileID: 2328339555784104485, guid: 5f5f94dfabc84b84ea5a85ef374e30d6, type: 3}
+  tilePrefab: {fileID: 2328339555784104485, guid: 5f5f94dfabc84b84ea5a85ef374e30d6, type: 3}
   nextFloorObject: {fileID: 158327281}
 --- !u!4 &953227746
 Transform:

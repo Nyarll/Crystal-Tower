@@ -22,7 +22,7 @@ public class MapGenerator
 	 */
 	public Tile[,] GenerateMap(int mapSizeX, int mapSizeY, int maxRoom)
 	{
-		return _generateMap(mapSizeX, mapSizeY, maxRoom);
+		return this._generateMap(mapSizeX, mapSizeY, maxRoom);
 	}
 
 	/**
@@ -34,10 +34,10 @@ public class MapGenerator
 		this.mapSizeY = mapSizeY;
 
 		Tile[,] map = new Tile[mapSizeX, mapSizeY];
-		_initializeMapData(ref map);
+		this._initializeMapData(ref map);
 
-		_createRange(maxRoom);
-		_createRoom();
+		this._createRange(maxRoom);
+		this._createRoom();
 
 		// ここまでの結果を一度配列に反映する
 		foreach (Range pass in passList)
@@ -71,7 +71,9 @@ public class MapGenerator
 			}
 		}
 
-		_trimPassList(ref map);
+		this._trimPassList(ref map);
+		// TODO: Room, Passに隣接するタイルのみをWallにする
+		this._adjacentTileOnlyWall(ref map);
 
 		return map;
 	}
@@ -408,4 +410,12 @@ public class MapGenerator
 			}
 		}
 	}
+
+	/**
+	 * 隣接タイルのみ壁にする
+	 */
+	private void _adjacentTileOnlyWall(ref Tile[,] map)
+    {
+
+    }
 }
