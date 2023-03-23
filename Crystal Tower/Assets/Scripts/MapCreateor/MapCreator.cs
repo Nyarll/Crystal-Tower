@@ -28,7 +28,7 @@ public class MapCreator : MonoBehaviour
     [SerializeField]
     GameObject nextFloorObject;
 
-    private int[,] mapData;
+    private Tile[,] mapData;
 
     private Position playerPosition;
     private Position nextFloorPosition;
@@ -43,15 +43,26 @@ public class MapCreator : MonoBehaviour
 
     public void Generate()
     {
-        if (this.generator == null)
+        if (this.generator is null)
         {
             this.generator = new MapGenerator();
         }
 
+        Debug.Log("START Map Generate.");
         this.MapDelete();
         this.GenerateMap();
+        this.Spawn();
+    }
+
+    /**
+     * 各オブジェクトスポーン
+     */
+    private void Spawn()
+    {
         this.SpawnPlayer();
         this.SpawnNextFloor();
+        this.SpawnEnemies();
+        this.SpawnItems();
     }
 
     private void GenerateMap()
@@ -64,8 +75,8 @@ public class MapCreator : MonoBehaviour
         {
             for (int x = 0; x < this.MapSizeX; x++)
             {
-                // 「1」の箇所に床生成
-                if (mapData[x, y] == 1)
+                // Wallではない箇所に床生成
+                if (this.mapData[x, y].GetType() != TileType.Wall)
                 {
                     GameObject obj = Instantiate(floorPrefab, new Vector3(x, y, 1), new Quaternion());
                     obj.transform.parent = this.transform;
@@ -87,8 +98,7 @@ public class MapCreator : MonoBehaviour
      */
     private void SpawnPlayer()
     {
-        Debug.Log("START SpawnPlayer");
-        if (!this.playerObject)
+        if (this.playerObject is null)
         {
             Debug.Log("player object is null.");
             return;
@@ -98,7 +108,7 @@ public class MapCreator : MonoBehaviour
         do
         {
             spawn = new Position(RogueUtils.GetRandomInt(0, MapSizeX - 1), RogueUtils.GetRandomInt(0, MapSizeY - 1));
-        } while (this.mapData[spawn.X, spawn.Y] != 1);
+        } while (this.mapData[spawn.X, spawn.Y].GetType() != TileType.Room);
 
         this.playerObject.transform.position = new Vector3(spawn.X, spawn.Y, 0);
         this.playerPosition = spawn;
@@ -108,6 +118,37 @@ public class MapCreator : MonoBehaviour
      * 次の階層への階段スポーン
      */
     private void SpawnNextFloor()
+    {
+        if (this.nextFloorObject is null)
+        {
+            Debug.Log("next floor object is null.");
+            return;
+        }
+
+        Position spawn;
+        do
+        {
+            spawn = new Position(RogueUtils.GetRandomInt(0, MapSizeX - 1), RogueUtils.GetRandomInt(0, MapSizeY - 1));
+        } while ((this.mapData[spawn.X, spawn.Y].GetType() != TileType.Room) || (spawn == this.playerPosition));
+
+        this.nextFloorObject.transform.position = new Vector3(spawn.X, spawn.Y, 0);
+        this.nextFloorPosition = spawn;
+        Debug.Log("Spawn : (X: " + spawn.X + ", Y:" + spawn.Y + "), Type:" + this.mapData[spawn.X, spawn.Y].GetType());
+
+    }
+
+    /**
+     * 敵スポーン
+     */
+    private void SpawnEnemies()
+    {
+
+    }
+
+    /**
+     * アイテムスポーン
+     */
+    private void SpawnItems()
     {
 
     }

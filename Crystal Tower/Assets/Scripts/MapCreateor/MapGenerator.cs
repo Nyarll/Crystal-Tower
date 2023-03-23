@@ -20,7 +20,7 @@ public class MapGenerator
 	/**
 	 * マップ生成エントリ
 	 */
-	public int[,] GenerateMap(int mapSizeX, int mapSizeY, int maxRoom)
+	public Tile[,] GenerateMap(int mapSizeX, int mapSizeY, int maxRoom)
 	{
 		return _generateMap(mapSizeX, mapSizeY, maxRoom);
 	}
@@ -28,12 +28,13 @@ public class MapGenerator
 	/**
 	 * マップ生成
 	 */
-	private int[,] _generateMap(int mapSizeX, int mapSizeY, int maxRoom)
+	private Tile[,] _generateMap(int mapSizeX, int mapSizeY, int maxRoom)
 	{
 		this.mapSizeX = mapSizeX;
 		this.mapSizeY = mapSizeY;
 
-		int[,] map = new int[mapSizeX, mapSizeY];
+		Tile[,] map = new Tile[mapSizeX, mapSizeY];
+		_initializeMapData(ref map);
 
 		_createRange(maxRoom);
 		_createRoom();
@@ -45,7 +46,7 @@ public class MapGenerator
 			{
 				for (int y = pass.Start.Y; y <= pass.End.Y; y++)
 				{
-					map[x, y] = 1;
+					map[x, y].SetType(TileType.Pass);
 				}
 			}
 		}
@@ -55,7 +56,7 @@ public class MapGenerator
 			{
 				for (int y = roomPass.Start.Y; y <= roomPass.End.Y; y++)
 				{
-					map[x, y] = 1;
+					map[x, y].SetType(TileType.Pass);
 				}
 			}
 		}
@@ -65,7 +66,7 @@ public class MapGenerator
 			{
 				for (int y = room.Start.Y; y <= room.End.Y; y++)
 				{
-					map[x, y] = 1;
+					map[x, y].SetType(TileType.Room);
 				}
 			}
 		}
@@ -73,6 +74,17 @@ public class MapGenerator
 		_trimPassList(ref map);
 
 		return map;
+	}
+
+	private void _initializeMapData(ref Tile[,] map)
+    {
+		for (int y = 0; y < this.mapSizeY; y++)
+        {
+			for(int x = 0; x < this.mapSizeX; x++)
+            {
+				map[x, y] = new Tile(TileType.Wall, new Position(x, y));
+            }
+        }
 	}
 
 	/**
@@ -281,7 +293,7 @@ public class MapGenerator
 	/**
 	 * 不要な通路削除
 	 */
-	private void _trimPassList(ref int[,] map)
+	private void _trimPassList(ref Tile[,] map)
 	{
 		// どの部屋通路からも接続されなかった通路を削除する
 		for (int i = passList.Count - 1; i >= 0; i--)
@@ -297,7 +309,7 @@ public class MapGenerator
 				int x = pass.Start.X;
 				for (int y = pass.Start.Y; y <= pass.End.Y; y++)
 				{
-					if (map[x - 1, y] == 1 || map[x + 1, y] == 1)
+					if (map[x - 1, y].GetType() != TileType.Wall || map[x + 1, y].GetType() != TileType.Wall)
 					{
 						isTrimTarget = false;
 						break;
@@ -309,7 +321,7 @@ public class MapGenerator
 				int y = pass.Start.Y;
 				for (int x = pass.Start.X; x <= pass.End.X; x++)
 				{
-					if (map[x, y - 1] == 1 || map[x, y + 1] == 1)
+					if (map[x, y - 1].GetType() != TileType.Wall || map[x, y + 1].GetType() != TileType.Wall)
 					{
 						isTrimTarget = false;
 						break;
@@ -328,7 +340,7 @@ public class MapGenerator
 					int x = pass.Start.X;
 					for (int y = pass.Start.Y; y <= pass.End.Y; y++)
 					{
-						map[x, y] = 0;
+						map[x, y].SetType(TileType.Wall);
 					}
 				}
 				else
@@ -336,7 +348,7 @@ public class MapGenerator
 					int y = pass.Start.Y;
 					for (int x = pass.Start.X; x <= pass.End.X; x++)
 					{
-						map[x, y] = 0;
+						map[x, y].SetType(TileType.Wall);
 					}
 				}
 			}
@@ -346,52 +358,52 @@ public class MapGenerator
 		// 上下基準
 		for (int x = 0; x < mapSizeX - 1; x++)
 		{
-			if (map[x, 0] == 1)
+			if (map[x, 0].GetType() != TileType.Wall)
 			{
 				for (int y = 0; y < mapSizeY; y++)
 				{
-					if (map[x - 1, y] == 1 || map[x + 1, y] == 1)
+					if (map[x - 1, y].GetType() != TileType.Wall || map[x + 1, y].GetType() != TileType.Wall)
 					{
 						break;
 					}
-					map[x, y] = 0;
+					map[x, y].SetType(TileType.Wall);
 				}
 			}
-			if (map[x, mapSizeY - 1] == 1)
+			if (map[x, mapSizeY - 1].GetType() != TileType.Wall)
 			{
 				for (int y = mapSizeY - 1; y >= 0; y--)
 				{
-					if (map[x - 1, y] == 1 || map[x + 1, y] == 1)
+					if (map[x - 1, y].GetType() != TileType.Wall || map[x + 1, y].GetType() != TileType.Wall)
 					{
 						break;
 					}
-					map[x, y] = 0;
+					map[x, y].SetType(TileType.Wall);
 				}
 			}
 		}
 		// 左右基準
 		for (int y = 0; y < mapSizeY - 1; y++)
 		{
-			if (map[0, y] == 1)
+			if (map[0, y].GetType() != TileType.Wall)
 			{
 				for (int x = 0; x < mapSizeY; x++)
 				{
-					if (map[x, y - 1] == 1 || map[x, y + 1] == 1)
+					if (map[x, y - 1].GetType() != TileType.Wall || map[x, y + 1].GetType() != TileType.Wall)
 					{
 						break;
 					}
-					map[x, y] = 0;
+					map[x, y].SetType(TileType.Wall);
 				}
 			}
-			if (map[mapSizeX - 1, y] == 1)
+			if (map[mapSizeX - 1, y].GetType() != TileType.Wall)
 			{
 				for (int x = mapSizeX - 1; x >= 0; x--)
 				{
-					if (map[x, y - 1] == 1 || map[x, y + 1] == 1)
+					if (map[x, y - 1].GetType() != TileType.Wall || map[x, y + 1].GetType() != TileType.Wall)
 					{
 						break;
 					}
-					map[x, y] = 0;
+					map[x, y].SetType(TileType.Wall);
 				}
 			}
 		}
