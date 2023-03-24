@@ -136,7 +136,7 @@ public class MapCreator : MonoBehaviour
 
         this.playerObject.transform.position = new Vector3(spawn.X, spawn.Y, 0);
         this.playerPosition = spawn;
-        this.playerObject.GetComponent<Player>().SetMapData(this.mapData);
+        this.playerObject.GetComponent<Player>().SetMapData(mapData);
     }
 
     /**

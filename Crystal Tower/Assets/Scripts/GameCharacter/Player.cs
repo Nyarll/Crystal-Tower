@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class Player : Actor
 {
-    [SerializeField]
-    private GameObject mapCreator;
-
     private Tile[,] map;
 
     private bool isMove = false;
@@ -22,7 +19,7 @@ public class Player : Actor
     // Start is called before the first frame update
     void Start()
     {
-
+        
     }
 
     // Update is called once per frame
