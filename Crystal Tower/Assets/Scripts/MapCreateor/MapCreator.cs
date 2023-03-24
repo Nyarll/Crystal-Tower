@@ -46,6 +46,7 @@ public class MapCreator : MonoBehaviour
         Generate();   
     }
 
+
     public void Generate()
     {
         if (this.generator is null)
@@ -53,7 +54,6 @@ public class MapCreator : MonoBehaviour
             this.generator = new MapGenerator();
         }
 
-        Debug.Log("START Map Generate.");
         this.MapDelete();
         this.GenerateMap();
         this.Spawn();
@@ -111,10 +111,12 @@ public class MapCreator : MonoBehaviour
 
     private void MapDelete()
     {
+        Debug.Log("delete");
         foreach (Transform obj in gameObject.transform)
         {
             GameObject.Destroy(obj.gameObject);
         }
+        generator.DeleteMap();
     }
 
     /**

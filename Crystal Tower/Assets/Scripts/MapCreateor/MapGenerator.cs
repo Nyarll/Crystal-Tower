@@ -10,6 +10,9 @@ public class MapGenerator
 	private int mapSizeY;
 	private int maxRoom;
 
+	private const int bossMapSizeX = 32;
+	private const int bossMapSizeY = 32;
+
 	private List<Range> roomList = new List<Range>();
 	private List<Range> rangeList = new List<Range>();
 	private List<Range> passList = new List<Range>();
@@ -20,12 +23,20 @@ public class MapGenerator
 	private TileType fillType = TileType.None;
 
 	/**
-	 * マップ生成エントリ
+	 * 通常マップ生成エントリ
 	 */
 	public Tile[,] GenerateMap(int mapSizeX, int mapSizeY, int maxRoom)
 	{
 		return this._generateMap(mapSizeX, mapSizeY, maxRoom);
 	}
+
+	public void DeleteMap()
+    {
+		roomList.Clear();
+		rangeList.Clear();
+		passList.Clear();
+		roomPassList.Clear();
+    }
 
 	/**
 	 * マップ生成
@@ -78,7 +89,6 @@ public class MapGenerator
 		}
 
 		this._trimPassList(ref map);
-		// TODO: Room, Passに隣接するタイルのみをWallにする
 		this._adjacentTileOnlyWall(ref map);
 
 		return map;

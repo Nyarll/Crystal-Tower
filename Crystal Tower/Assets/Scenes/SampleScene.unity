@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 138936293}
   - component: {fileID: 138936294}
   - component: {fileID: 138936292}
+  - component: {fileID: 138936295}
   m_Layer: 0
   m_Name: GameObserver
   m_TagString: Untagged
@@ -187,6 +188,20 @@ MonoBehaviour:
   playerObject: {fileID: 247956816}
   tilePrefab: {fileID: 2328339555784104485, guid: 5f5f94dfabc84b84ea5a85ef374e30d6, type: 3}
   nextFloorObject: {fileID: 158327281}
+--- !u!114 &138936295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 138936291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f653eaecf38f1794680ea4805ab3e81b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 247956816}
+  nextFloor: {fileID: 158327281}
 --- !u!1 &158327281
 GameObject:
   m_ObjectHideFlags: 0
