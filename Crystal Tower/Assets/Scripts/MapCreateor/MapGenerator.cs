@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MapGenerator
 {
-	private const int MINIMUM_RANGE_WIDTH = 6;
+	private const int MINIMUM_RANGE_WIDTH = 10;
 
 	private int mapSizeX;
 	private int mapSizeY;
@@ -311,11 +311,14 @@ public class MapGenerator
 
 	}
 
-	/**
-	 * •s—v‚È’Ê˜Híœ
-	 */
+	/// <summary>
+	/// •s—v‚È’Ê˜H‚ğíœ
+	/// </summary>
+	/// <param name="map"></param>
 	private void _trimPassList(ref Tile[,] map)
 	{
+		// ŒÇ—§‚·‚é‹óŠÔ‚ª‚Å‚«‚Ä‚µ‚Ü‚¤‚½‚ß—˜—p‚µ‚È‚¢
+		/*
 		// ‚Ç‚Ì•”‰®’Ê˜H‚©‚ç‚àÚ‘±‚³‚ê‚È‚©‚Á‚½’Ê˜H‚ğíœ‚·‚é
 		for (int i = passList.Count - 1; i >= 0; i--)
 		{
@@ -374,6 +377,7 @@ public class MapGenerator
 				}
 			}
 		}
+		/**/
 
 		// ŠOü‚ÉÚ‚µ‚Ä‚¢‚é’Ê˜H‚ğ•Ê‚Ì’Ê˜H‚Æ‚ÌÚ‘±“_‚Ü‚Åíœ‚·‚é
 		// ã‰ºŠî€
