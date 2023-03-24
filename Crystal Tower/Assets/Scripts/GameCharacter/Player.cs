@@ -6,85 +6,45 @@ public class Player : Actor
 {
     private Tile[,] map;
 
-    private bool isMove = false;
-
-    private Vector2 now_position;
-    private Vector2 next_position;
+    private GameObject sequenceManager;
+    private Sequence playerPhase;
 
     public void SetMapData(Tile[,] map)
     {
         this.map = map;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
     // Update is called once per frame
     void Update()
     {
-        now_position = transform.position;
-        if (!isMove)
+        int horizontal = 0;
+        int vertical = 0;
+        horizontal = (int)(Input.GetAxisRaw("Horizontal"));
+        vertical = (int)(Input.GetAxisRaw("Vertical"));
+
+        Debug.Log("Input: ( " + horizontal + ", " + vertical + " )");
+
+        if (horizontal != 0 || vertical != 0)
         {
-            this.Move();
-        }
-        else
-        {
-            this.onMove();
+            AttemptMove(horizontal, vertical);
         }
     }
 
-    private void Move()
+    protected override void AttemptMove(int xDir, int yDir)
     {
-        next_position = transform.position;
-        move_direction = Vector2.zero;
+        sequenceManager = GameObject.FindGameObjectWithTag("Observer");
+        playerPhase = sequenceManager.GetComponent<SequenceManager>().GetCurrentSequence();
 
-        if (Input.GetKey(KeyCode.LeftArrow))
+        if (playerPhase == Sequence.StandbyPhase)
         {
-            move_direction.x -= 1;
-            next_position.x -= 1;
-            isMove = true;
-        }
-        else if (Input.GetKey(KeyCode.RightArrow))
-        {
-            move_direction.x += 1;
-            next_position.x += 1;
-            isMove = true;
-        }
-        else if (Input.GetKey(KeyCode.UpArrow))
-        {
-            move_direction.y += 1;
-            next_position.y += 1;
-            isMove = true;
-        }
-        else if (Input.GetKey(KeyCode.DownArrow))
-        {
-            move_direction.y -= 1;
-            next_position.y -= 1;
-            isMove = true;
+            base.AttemptMove(xDir, yDir);
+            sequenceManager.GetComponent<SequenceManager>().ChangeCurrentSequence(Sequence.PlayerPhase);
         }
     }
 
-    private void onMove()
+    protected override void OnCantMove(GameObject hitComponent)
     {
-        // à⁄ìÆêÊÇ™ï«Ç≈Ç»ÇØÇÍÇŒà⁄ìÆÇ∑ÇÈ
-        if (map[(int)Mathf.Floor(next_position.x), (int)Mathf.Floor(next_position.y)].GetType() != TileType.Wall)
-        {
-            if (now_position != next_position)
-            {
-                now_position += move_direction / MOVING_INTERVAL;
-            }
-            transform.position = now_position;
-            if (transform.position.x == next_position.x && transform.position.y == next_position.y)
-            {
-                isMove = false;
-            }
-        }
-        else
-        {
-            isMove = false;
-        }
+        // ì¡Ç…Ç»Çµ
+        Debug.Log("PLAYER: OnCantMove");
     }
 }
