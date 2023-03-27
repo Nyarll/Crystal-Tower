@@ -12,4 +12,5 @@ public class RogueUtils
 	{
 		return Random.value < rate;
 	}
+
 }

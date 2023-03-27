@@ -4,18 +4,16 @@ using UnityEngine;
 
 public class Player : Actor
 {
-    private Tile[,] map;
-
     private Sequence nowPhase;
-
-    public void SetMapData(Tile[,] map)
-    {
-        this.map = map;
-    }
 
     protected override void Start()
     {
         base.Start();
+    }
+
+    private void OnDisable()
+    {
+        
     }
 
     // Update is called once per frame
@@ -52,6 +50,18 @@ public class Player : Actor
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        
+        if (other.tag == "Change")
+        {
+            ChangeFloor();
+        }
+    }
+
+    private void ChangeFloor()
+    {
+        StopCoroutine(_moving);
+        isMoving = false;
+        Observer observer = GameObject.Find("GameObserver").GetComponent<Observer>();
+        observer.ChangeFloor();
+        StartCoroutine(SmoothMovement(transform.position));
     }
 }

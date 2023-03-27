@@ -16,22 +16,26 @@ public class MapCreator : MonoBehaviour
     [SerializeField]
     int MaxRoom = 10;
 
-    // プレイヤー
-    [SerializeField]
-    GameObject playerObject;
-
     // タイル
     [SerializeField]
     GameObject tilePrefab;
 
-    // 階段
     [SerializeField]
-    GameObject nextFloorObject;
+    int enemyNumMin = 5;
+
+    [SerializeField]
+    int enemyNumMax = 10;
 
     private Tile[,] mapData;
 
-    private Position playerPosition;
-    private Position nextFloorPosition;
+    private Position playerSpawnPoint;
+    private Vector3 playerSpawn;
+
+    private Position nextFloorSpawnPoint;
+    private Vector3 nextFloorSpawn;
+
+    private List<Position> enemySpawnPointList;
+    private List<Vector3> enemySpawnList;
 
     private MapGenerator generator = null;
 
@@ -40,16 +44,9 @@ public class MapCreator : MonoBehaviour
         return this.mapData;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        Generate();   
-    }
-
-
     public void Generate()
     {
-        if (this.generator is null)
+        if (this.generator == null)
         {
             this.generator = new MapGenerator();
         }
@@ -113,7 +110,6 @@ public class MapCreator : MonoBehaviour
 
     private void MapDelete()
     {
-        Debug.Log("delete");
         foreach (Transform obj in gameObject.transform)
         {
             GameObject.Destroy(obj.gameObject);
@@ -126,21 +122,23 @@ public class MapCreator : MonoBehaviour
      */
     private void SpawnPlayer()
     {
-        if (this.playerObject is null)
-        {
-            Debug.Log("player object is null.");
-            return;
-        }
-
         Position spawn;
         do
         {
             spawn = new Position(RogueUtils.GetRandomInt(0, MapSizeX - 1), RogueUtils.GetRandomInt(0, MapSizeY - 1));
         } while (this.mapData[spawn.X, spawn.Y].GetType() != TileType.Room);
 
-        this.playerObject.transform.position = new Vector3(spawn.X, spawn.Y, 0);
-        this.playerPosition = spawn;
-        this.playerObject.GetComponent<Player>().SetMapData(mapData);
+        this.playerSpawnPoint = spawn;
+        this.playerSpawn = new Vector3(spawn.X, spawn.Y, 0);
+    }
+
+    /// <summary>
+    /// プレイヤースポーンポイントを取得する
+    /// </summary>
+    /// <returns></returns>
+    public Vector3 GetPlayerSpawnPoint()
+    {
+        return this.playerSpawn;
     }
 
     /**
@@ -148,22 +146,23 @@ public class MapCreator : MonoBehaviour
      */
     private void SpawnNextFloor()
     {
-        if (this.nextFloorObject is null)
-        {
-            Debug.Log("next floor object is null.");
-            return;
-        }
-
         Position spawn;
         do
         {
             spawn = new Position(RogueUtils.GetRandomInt(0, MapSizeX - 1), RogueUtils.GetRandomInt(0, MapSizeY - 1));
-        } while ((this.mapData[spawn.X, spawn.Y].GetType() != TileType.Room) || (spawn == this.playerPosition));
+        } while ((this.mapData[spawn.X, spawn.Y].GetType() != TileType.Room) || (spawn == this.playerSpawnPoint));
 
-        this.nextFloorObject.transform.position = new Vector3(spawn.X, spawn.Y, 0);
-        this.nextFloorPosition = spawn;
-        Debug.Log("Spawn : (X: " + spawn.X + ", Y:" + spawn.Y + "), Type:" + this.mapData[spawn.X, spawn.Y].GetType());
+        this.nextFloorSpawnPoint = spawn;
+        this.nextFloorSpawn = new Vector3(spawn.X, spawn.Y, 0);
+    }
 
+    /// <summary>
+    /// 階段のスポーンポイントを取得する
+    /// </summary>
+    /// <returns></returns>
+    public Vector3 GetNextFloorSpawnPoint()
+    {
+        return this.nextFloorSpawn;
     }
 
     /**
@@ -171,7 +170,41 @@ public class MapCreator : MonoBehaviour
      */
     private void SpawnEnemies()
     {
+        if (enemySpawnList == null)
+        {
+            enemySpawnList = new List<Vector3>();
+        }
+        if(enemySpawnPointList == null)
+        {
+            enemySpawnPointList = new List<Position>();
+        }
+        enemySpawnList.Clear();
+        enemySpawnPointList.Clear();
+        // スポーンさせるEnemyの数
+        int num = RogueUtils.GetRandomInt(enemyNumMin, enemyNumMax);
+        for (int i = 0; i < num; i++)
+        {
+            Position spawn;
+            while (true)
+            {
+                spawn = new Position(RogueUtils.GetRandomInt(0, MapSizeX - 1), RogueUtils.GetRandomInt(0, MapSizeY - 1));
+                if (!enemySpawnPointList.Contains(spawn) && 
+                    (spawn != this.playerSpawnPoint) &&
+                    ((this.mapData[spawn.X, spawn.Y].GetType() == TileType.Room) ||
+                    (this.mapData[spawn.X, spawn.Y].GetType() == TileType.Pass)))
+                {
+                    enemySpawnPointList.Add(spawn);
+                    enemySpawnList.Add(new Vector3(spawn.X, spawn.Y, 0));
+                    break;
+                }
+            }
 
+        }
+    }
+
+    public List<Vector3> GetEnemySpawnPointList()
+    {
+        return enemySpawnList;
     }
 
     /**

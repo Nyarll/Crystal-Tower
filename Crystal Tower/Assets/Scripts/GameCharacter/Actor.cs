@@ -4,12 +4,21 @@ using UnityEngine;
 
 public abstract class Actor : MonoBehaviour
 {
+    protected Tile[,] map;
+
     private Rigidbody2D rb;
     private BoxCollider2D boxCollider;
 
     private float moveTime = 0.01f;
     private float inverseMoveTime;
-    private bool isMoving = false;
+    protected bool isMoving = false;
+
+    protected Coroutine _moving;
+
+    public void SetMapData(Tile[,] map)
+    {
+        this.map = map;
+    }
 
     protected virtual void Start()
     {
@@ -33,7 +42,7 @@ public abstract class Actor : MonoBehaviour
 
         if (hit.transform is null && !isMoving)
         {
-            StartCoroutine(SmoothMovement(end));
+            _moving = StartCoroutine(SmoothMovement(end));
             return true;
         }
         return false;
@@ -45,7 +54,7 @@ public abstract class Actor : MonoBehaviour
 
         float sqrRemainingDistance = (transform.position - end).sqrMagnitude;
 
-        while (sqrRemainingDistance > float.Epsilon)
+        while (sqrRemainingDistance > float.Epsilon && isMoving)
         {
             Vector3 newPosition = Vector3.MoveTowards(rb.position, end, inverseMoveTime * Time.deltaTime);
             rb.MovePosition(newPosition);

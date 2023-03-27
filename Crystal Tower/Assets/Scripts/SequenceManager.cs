@@ -82,9 +82,14 @@ public class SequenceManager : MonoBehaviour
         ChangeCurrentSequence(Sequence.EndPhase);
     }
 
+    public void AddEnemyToList(Enemy enemy)
+    {
+        // enemy‚ðlist‚É“o˜^
+    }
+
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }
