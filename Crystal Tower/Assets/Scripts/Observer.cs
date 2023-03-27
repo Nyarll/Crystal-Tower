@@ -26,6 +26,7 @@ public class Observer : MonoBehaviour
     {
         if(player.transform.position == nextFloor.transform.position)
         {
+            this.GetComponent<SequenceManager>().ChangeCurrentSequence(Sequence.EndPhase);
             this.GetComponent<MapCreator>().Generate();
         }
     }

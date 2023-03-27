@@ -6,45 +6,52 @@ public class Player : Actor
 {
     private Tile[,] map;
 
-    private GameObject sequenceManager;
-    private Sequence playerPhase;
+    private Sequence nowPhase;
 
     public void SetMapData(Tile[,] map)
     {
         this.map = map;
     }
 
-    // Update is called once per frame
-    void Update()
+    protected override void Start()
     {
+        base.Start();
+    }
+
+    // Update is called once per frame
+    private void Update()
+    {
+        nowPhase = SequenceManager.instance.GetCurrentSequence();
+
+        if (nowPhase != Sequence.StandbyPhase)
+        {
+            return;
+        }
+
         int horizontal = 0;
         int vertical = 0;
         horizontal = (int)(Input.GetAxisRaw("Horizontal"));
         vertical = (int)(Input.GetAxisRaw("Vertical"));
 
-        Debug.Log("Input: ( " + horizontal + ", " + vertical + " )");
-
         if (horizontal != 0 || vertical != 0)
         {
-            AttemptMove(horizontal, vertical);
+            AttemptMove<Wall>(horizontal, vertical);
         }
     }
 
-    protected override void AttemptMove(int xDir, int yDir)
+    protected override void AttemptMove<T>(int xDir, int yDir)
     {
-        sequenceManager = GameObject.FindGameObjectWithTag("Observer");
-        playerPhase = sequenceManager.GetComponent<SequenceManager>().GetCurrentSequence();
-
-        if (playerPhase == Sequence.StandbyPhase)
-        {
-            base.AttemptMove(xDir, yDir);
-            sequenceManager.GetComponent<SequenceManager>().ChangeCurrentSequence(Sequence.PlayerPhase);
-        }
+        base.AttemptMove<T>(xDir, yDir);
+        SequenceManager.instance.ChangeCurrentSequence(Sequence.PlayerPhase);
     }
 
-    protected override void OnCantMove(GameObject hitComponent)
+    protected override void OnCantMove<T>(T hitComponent)
     {
         // “Á‚É‚È‚µ
-        Debug.Log("PLAYER: OnCantMove");
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        
     }
 }

@@ -90,6 +90,7 @@ public class MapCreator : MonoBehaviour
                     {
                         case TileType.Wall:
                             obj.layer = LayerMask.NameToLayer("Wall");
+                            obj.AddComponent<Wall>();
                             sprite.color = new Color32(64, 32, 0, 255);
                             break;
 

@@ -17,7 +17,7 @@ public class SequenceManager : MonoBehaviour
     public static SequenceManager instance = null;
 
     private Sequence currentSequence;
-    float turnDelay = 0.20f;
+    float turnDelay = 0.02f;
 
     private void Awake()
     {
