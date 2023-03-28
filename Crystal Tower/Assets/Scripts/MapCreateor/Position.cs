@@ -19,4 +19,14 @@ public class Position
     {
         return string.Format("({0}, {1})", X, Y);
     }
+
+    public override bool Equals(object obj)
+    {
+        return Equals(obj as Position);
+    }
+
+    public bool Equals(Position other)
+    {
+        return (other != null) && (this.X == other.X) && (this.Y == other.Y);
+    }
 }

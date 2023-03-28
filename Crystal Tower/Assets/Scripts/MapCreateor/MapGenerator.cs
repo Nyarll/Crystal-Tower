@@ -4,483 +4,446 @@ using UnityEngine;
 
 public class MapGenerator
 {
-	private const int MINIMUM_RANGE_WIDTH = 10;
+	// 最小エリアサイズ
+	private const int MINIMUM_AREA_SIZE = 10;
 
-	private int mapSizeX;
-	private int mapSizeY;
-	private int maxRoom;
+	// マップサイズ
+	private int mapWidth;
+	private int mapHeight;
 
-	private const int bossMapSizeX = 32;
-	private const int bossMapSizeY = 32;
+	// 最大部屋数
+	int maxRoomNum;
 
-	private List<Range> roomList = new List<Range>();
-	private List<Range> rangeList = new List<Range>();
-	private List<Range> passList = new List<Range>();
-	private List<Range> roomPassList = new List<Range>();
+	// マップデータ本体
+	Tile[,] map;
 
-	private bool isGenerated = false;
+	// エリア
+	List<Range> areaList = new List<Range>();
+	// 部屋
+	List<Range> roomList = new List<Range>();
+	// 通路
+	List<Range> passList = new List<Range>();
+	// 部屋が存在するエリアを記憶する
+	List<int> areaWhereRoomExists = new List<int>();
 
-	private TileType fillType = TileType.None;
+	TileType fillType = TileType.None;
 
-	/**
-	 * 通常マップ生成エントリ
-	 */
-	public Tile[,] GenerateMap(int mapSizeX, int mapSizeY, int maxRoom)
-	{
-		return this._generateMap(mapSizeX, mapSizeY, maxRoom);
-	}
-
-	public void DeleteMap()
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	/// <param name="width"></param>
+	/// <param name="height"></param>
+	/// <param name="roomNum"></param>
+	public MapGenerator(int width, int height, int roomNum)
     {
-		roomList.Clear();
-		rangeList.Clear();
-		passList.Clear();
-		roomPassList.Clear();
+		this.mapWidth = width;
+		this.mapHeight = height;
+		this.maxRoomNum = roomNum;
+		this.map = new Tile[width, height];
     }
 
-	/**
-	 * マップ生成
-	 */
-	private Tile[,] _generateMap(int mapSizeX, int mapSizeY, int maxRoom)
-	{
-		// 初期化
-		this.mapSizeX = mapSizeX;
-		this.mapSizeY = mapSizeY;
-
-		Tile[,] map = new Tile[mapSizeX, mapSizeY];
-		// マップデータ初期化
-		this._initializeMapData(ref map);
-
-		// 区画作成
-		this._createRange(maxRoom);
-		// 部屋作成
-		this._createRoom();
-
-		// ここまでの結果を一度配列に反映する
-		foreach (Range pass in passList)
-		{
-			for (int x = pass.Start.X; x <= pass.End.X; x++)
-			{
-				for (int y = pass.Start.Y; y <= pass.End.Y; y++)
-				{
-					map[x, y].SetType(TileType.Pass);
-				}
-			}
-		}
-		foreach (Range roomPass in roomPassList)
-		{
-			for (int x = roomPass.Start.X; x <= roomPass.End.X; x++)
-			{
-				for (int y = roomPass.Start.Y; y <= roomPass.End.Y; y++)
-				{
-					map[x, y].SetType(TileType.Pass);
-				}
-			}
-		}
-		foreach (Range room in roomList)
-		{
-			for (int x = room.Start.X; x <= room.End.X; x++)
-			{
-				for (int y = room.Start.Y; y <= room.End.Y; y++)
-				{
-					map[x, y].SetType(TileType.Room);
-				}
-			}
-		}
-
-		this._trimPassList(ref map);
-		this._adjacentTileOnlyWall(ref map);
-
-		return map;
-	}
-
-	private void _initializeMapData(ref Tile[,] map)
+	/// <summary>
+	/// マップデータ取得
+	/// </summary>
+	/// <returns></returns>
+	public Tile[,] GetMapData()
     {
-		// 一旦全部壁で埋める
-		for (int y = 0; y < this.mapSizeY; y++)
-        {
-			for(int x = 0; x < this.mapSizeX; x++)
-            {
-				map[x, y] = new Tile(fillType, new Position(x, y));
-            }
-        }
-	}
+		return this.map;
+    }
 
-	/**
-	 * 区画生成
-	 */
-	private void _createRange(int maxRoom)
-	{
-		// 区画のリストの初期値としてマップ全体を入れる
-		rangeList.Add(new Range(0, 0, mapSizeX - 1, mapSizeY - 1));
+	/// <summary>
+	/// マップ生成エントリ
+	/// </summary>
+	public void Generate()
+    {
+		_generate();
+    }
 
-		bool isDevided;
-		do
-		{
-			// 縦 → 横 の順番で部屋を区切っていく。一つも区切らなかったら終了
-			isDevided = _devideRange(false);
-			isDevided = _devideRange(true) || isDevided;
-
-			// もしくは最大区画数を超えたら終了
-			if (rangeList.Count >= maxRoom)
-			{
-				break;
-			}
-		} while (isDevided);
-
-	}
-
-	/**
-	 * エリアを区切る
-	 */
-	private bool _devideRange(bool isVertical)
-	{
-		bool isDevided = false;
-
-		// 区画ごとに切るかどうか判定する
-		List<Range> newRangeList = new List<Range>();
-		foreach (Range range in rangeList)
-		{
-			// これ以上分割できない場合はスキップ
-			if (isVertical && range.GetWidthY() < MINIMUM_RANGE_WIDTH * 2 + 1)
-			{
-				continue;
-			}
-			else if (!isVertical && range.GetWidthX() < MINIMUM_RANGE_WIDTH * 2 + 1)
-			{
-				continue;
-			}
-
-			System.Threading.Thread.Sleep(1);
-
-			// 40％の確率で分割しない
-			// ただし、区画の数が1つの時は必ず分割する
-			if (rangeList.Count > 1 && RogueUtils.RandomJadge(0.4f))
-			{
-				continue;
-			}
-
-			// 長さから最少の区画サイズ2つ分を引き、残りからランダムで分割位置を決める
-			int length = isVertical ? range.GetWidthY() : range.GetWidthX();
-			int margin = length - MINIMUM_RANGE_WIDTH * 2;
-			int baseIndex = isVertical ? range.Start.Y : range.Start.X;
-			int devideIndex = baseIndex + MINIMUM_RANGE_WIDTH + RogueUtils.GetRandomInt(1, margin) - 1;
-
-			// 分割された区画の大きさを変更し、新しい区画を追加リストに追加する
-			// 同時に、分割した境界を通路として保存しておく
-			
-			Range newRange = new Range();
-			
-			if (isVertical)
-			{
-				passList.Add(new Range(range.Start.X, devideIndex, range.End.X, devideIndex));
-				newRange = new Range(range.Start.X, devideIndex + 1, range.End.X, range.End.Y);
-				range.End.Y = devideIndex - 1;
-			}
-			else
-			{
-				passList.Add(new Range(devideIndex, range.Start.Y, devideIndex, range.End.Y));
-				newRange = new Range(devideIndex + 1, range.Start.Y, range.End.X, range.End.Y);
-				range.End.X = devideIndex - 1;
-			}
-			
-			// 追加リストに新しい区画を退避する。
-			newRangeList.Add(newRange);
-			
-			isDevided = true;
-		}
-
-		// 追加リストに退避しておいた新しい区画を追加する。
-		rangeList.AddRange(newRangeList);
-
-		return isDevided;
-	}
-
-	/**
-	 * 部屋生成
-	 */
-	private void _createRoom()
-	{
-		// 部屋のない区画が偏らないようにリストをシャッフルする
-		rangeList.Sort((a, b) => RogueUtils.GetRandomInt(0, 1) - 1);
-
-		// 1区画あたり1部屋を作っていく。作らない区画もあり。
-		foreach (Range range in rangeList)
-		{
-			System.Threading.Thread.Sleep(1);
-			// 30％の確率で部屋を作らない
-			// ただし、最大部屋数の半分に満たない場合は作る
-			if (roomList.Count > maxRoom / 2 && RogueUtils.RandomJadge(0.3f))
-			{
-				continue;
-			}
-
-			// 猶予を計算
-			int marginX = range.GetWidthX() - MINIMUM_RANGE_WIDTH + 1;
-			int marginY = range.GetWidthY() - MINIMUM_RANGE_WIDTH + 1;
-
-			// 開始位置を決定
-			int randomX = RogueUtils.GetRandomInt(1, marginX);
-			int randomY = RogueUtils.GetRandomInt(1, marginY);
-
-			// 座標を算出
-			int startX = range.Start.X + randomX;
-			int endX = range.End.X - RogueUtils.GetRandomInt(0, (marginX - randomX)) - 1;
-			int startY = range.Start.Y + randomY;
-			int endY = range.End.Y - RogueUtils.GetRandomInt(0, (marginY - randomY)) - 1;
-
-			// 部屋リストへ追加
-			Range room = new Range(startX, startY, endX, endY);
-			roomList.Add(room);
-
-			// 通路を作る
-			_createPass(range, room);
-		}
-	}
-
-	/**
-	 * 通路生成
-	 */
-	private void _createPass(Range range, Range room)
-	{
-		List<int> directionList = new List<int>();
-		if (range.Start.X != 0)
-		{
-			// Xマイナス方向
-			directionList.Add(0);
-		}
-		if (range.End.X != mapSizeX - 1)
-		{
-			// Xプラス方向
-			directionList.Add(1);
-		}
-		if (range.Start.Y != 0)
-		{
-			// Yマイナス方向
-			directionList.Add(2);
-		}
-		if (range.End.Y != mapSizeY - 1)
-		{
-			// Yプラス方向
-			directionList.Add(3);
-		}
-
-		// 通路の有無が偏らないよう、リストをシャッフルする
-		directionList.Sort((a, b) => RogueUtils.GetRandomInt(0, 1) - 1);
-
-		bool isFirst = true;
-		foreach (int direction in directionList)
-		{
-			System.Threading.Thread.Sleep(1);
-			// 80%の確率で通路を作らない
-			// ただし、まだ通路がない場合は必ず作る
-			if (!isFirst && RogueUtils.RandomJadge(0.8f))
-			{
-				continue;
-			}
-			else
-			{
-				isFirst = false;
-			}
-
-			// 向きの判定
-			int random;
-			switch (direction)
-			{
-				case 0: // Xマイナス方向
-					random = room.Start.Y + RogueUtils.GetRandomInt(1, room.GetWidthY()) - 1;
-					roomPassList.Add(new Range(range.Start.X, random, room.Start.X - 1, random));
-					break;
-
-				case 1: // Xプラス方向
-					random = room.Start.Y + RogueUtils.GetRandomInt(1, room.GetWidthY()) - 1;
-					roomPassList.Add(new Range(room.End.X + 1, random, range.End.X, random));
-					break;
-
-				case 2: // Yマイナス方向
-					random = room.Start.X + RogueUtils.GetRandomInt(1, room.GetWidthX()) - 1;
-					roomPassList.Add(new Range(random, range.Start.Y, random, room.Start.Y - 1));
-					break;
-
-				case 3: // Yプラス方向
-					random = room.Start.X + RogueUtils.GetRandomInt(1, room.GetWidthX()) - 1;
-					roomPassList.Add(new Range(random, room.End.Y + 1, random, range.End.Y));
-					break;
-			}
-		}
-
+	/// <summary>
+	/// マップ生成
+	/// </summary>
+	private void _generate()
+    {
+		_mapInitialize();
+		_createArea();
+		_createRoom();
+		_createPass();
+		_reflectListIntoMap();
+		_adjacentTileOnlyWall();
 	}
 
 	/// <summary>
-	/// 不要な通路を削除
+	/// マップ初期化
 	/// </summary>
-	/// <param name="map"></param>
-	private void _trimPassList(ref Tile[,] map)
-	{
-		// 孤立する空間ができてしまうため利用しない
-		/*
-		// どの部屋通路からも接続されなかった通路を削除する
-		for (int i = passList.Count - 1; i >= 0; i--)
-		{
-			Range pass = passList[i];
+	private void _mapInitialize()
+    {
+		_mapDelete();
+		for (int y = 0; y < this.mapHeight; y++)
+        {
+			for (int x = 0; x < this.mapWidth; x++)
+            {
+				map[y, x] = new Tile(fillType, new Position(x, y));
+            }
+        }
+    }
 
-			bool isVertical = pass.GetWidthY() > 1;
+	private void _mapDelete()
+    {
+		roomList.Clear();
+		areaList.Clear();
+		passList.Clear();
+		areaWhereRoomExists.Clear();
+    }
 
-			// 通路が部屋通路から接続されているかチェック
-			bool isTrimTarget = true;
+	/// <summary>
+	/// エリア作成
+	/// </summary>
+	private void _createArea()
+    {
+		this.areaList.Add(new Range(0, 0, this.mapWidth - 1, this.mapHeight - 1));
+		bool isDevided = true;
+		while (isDevided)
+        {
+			isDevided = _splitArea(false);
+			isDevided = _splitArea(true) || isDevided;
+			if (this.areaList.Count >= this.maxRoomNum)
+            {
+				break;
+            }
+		}
+    }
+
+	private bool _splitArea(bool isVertical)
+    {
+		bool isDevided = isVertical;
+		List<Range> newAreaList = new List<Range>();
+		foreach (Range area in areaList)
+        {
+			if (isVertical && area.GetWidthY() < MINIMUM_AREA_SIZE * 2 + 1)
+            {
+				continue;
+            }
+			else if (!isVertical && area.GetWidthX() < MINIMUM_AREA_SIZE * 2 + 1)
+            {
+				continue;
+            }
+			System.Threading.Thread.Sleep(1);
+			if (areaList.Count > 1 && RogueUtils.RandomJadge(0.4f))
+            {
+				continue;
+            }
+
+			int length = isVertical ? area.GetWidthY() : area.GetWidthX();
+			int margin = length - MINIMUM_AREA_SIZE * 2;
+			int base_index = isVertical ? area.Start.Y : area.Start.X;
+			int devide_index = base_index + MINIMUM_AREA_SIZE + RogueUtils.GetRandomInt(1, margin) - 1;
+			Range new_area = new Range();
 			if (isVertical)
-			{
-				int x = pass.Start.X;
-				for (int y = pass.Start.Y; y <= pass.End.Y; y++)
-				{
-					if (map[x - 1, y].GetType() != fillType || map[x + 1, y].GetType() != fillType)
-					{
-						isTrimTarget = false;
-						break;
-					}
-				}
-			}
+            {
+				new_area = new Range(area.Start.X, devide_index + 1, area.End.X, area.End.Y);
+				area.End.Y = devide_index - 1;
+            }
 			else
+            {
+				new_area = new Range(devide_index + 1, area.Start.Y, area.End.X, area.End.Y);
+				area.End.X = devide_index - 1;
+            }
+			newAreaList.Add(new_area);
+			isDevided = true;
+        }
+		areaList.AddRange(newAreaList);
+		return isDevided;
+    }
+
+	/// <summary>
+	/// 部屋作成
+	/// </summary>
+	private void _createRoom()
+    {
+		areaList.Sort((a, b) => RogueUtils.GetRandomInt(0, 1) - 1);
+		for (int i = 0; i < areaList.Count; i++)
+        {
+			System.Threading.Thread.Sleep(1);
+			if (roomList.Count > maxRoomNum / 2 && RogueUtils.RandomJadge(0.3f))
+            {
+				continue;
+            }
+			Range area = areaList[i];
+
+			int marginX = area.GetWidthX() - MINIMUM_AREA_SIZE + 1;
+			int marginY = area.GetWidthY() - MINIMUM_AREA_SIZE + 1;
+			int randomX = RogueUtils.GetRandomInt(1, marginX);
+			int randomY = RogueUtils.GetRandomInt(1, marginY);
+			int startX = area.Start.X + randomX;
+			int startY = area.Start.Y + randomY;
+			int endX = area.End.X - RogueUtils.GetRandomInt(0, (marginX - randomX)) - 1;
+			int endY = area.End.Y - RogueUtils.GetRandomInt(0, (marginY - randomY)) - 1;
+
+			Range room = new Range(startX, startY, endX, endY);
+			roomList.Add(room);
+			areaWhereRoomExists.Add(i);
+		}
+    }
+
+	/// <summary>
+	/// 通路作成
+	/// </summary>
+	private void _createPass()
+    {
+		_extendPassFromRoom();
+		_connectPass();
+    }
+
+	/// <summary>
+	/// 部屋から通路を伸ばす
+	/// </summary>
+	private void _extendPassFromRoom()
+    {
+		int count = 0;
+		for (int i = 0; i < areaList.Count; i++)
+        {
+			// 部屋の存在しないエリアはスキップ
+			if (!areaWhereRoomExists.Contains(i))
+            {
+				continue;
+            }
+
+			Range room = roomList[count];
+			// 部屋内のランダムな点を取る
+			int randomX = RogueUtils.GetRandomInt(room.Start.X, room.End.X);
+			int randomY = RogueUtils.GetRandomInt(room.Start.Y, room.End.Y);
+
+			int startX = randomX;
+			int startY = randomY;
+			int endX = randomX;
+			int endY = randomY;
+
+			if (areaList[i].End.X < mapWidth - 1)
+            {
+				int targetX = areaList[i].End.X + 1;
+				Range pass = new Range(startX, startY, targetX, endY);
+				passList.Add(pass);
+            }
+			if (areaList[i].Start.X > 0)
+            {
+				int targetX = areaList[i].Start.X - 1;
+				Range pass = new Range(targetX, startY, endX, endY);
+				passList.Add(pass);
+            }
+			if (areaList[i].End.Y < mapHeight - 1)
+            {
+				int targetY = areaList[i].End.Y + 1;
+				Range pass = new Range(startX, startY, endX, targetY);
+				passList.Add(pass);
+            }
+			if (areaList[i].Start.Y > 0)
+            {
+				int targetY = areaList[i].Start.Y - 1;
+				Range pass = new Range(startX, targetY, endX, endY);
+				passList.Add(pass);
+            }
+			count++;
+		}
+    }
+
+	/// <summary>
+	/// 伸ばした通路を接続する
+	/// </summary>
+	private void _connectPass()
+    {
+		int nowPassSize = passList.Count;
+		for (int i = 0; i < nowPassSize; i++)
+        {
+			for (int k = 0; k < nowPassSize; k++)
+            {
+				if (i == k)
+                {
+					continue;
+                }
+				if (passList[i].Start.Equals(passList[k].Start) ||
+					passList[i].Start.Equals(passList[k].End) ||
+					passList[i].End.Equals(passList[k].Start) ||
+					passList[i].End.Equals(passList[k].End))
+                {
+					continue;
+                }
+				__connectPass(i, k);
+            }
+        }
+    }
+
+	private void __connectPass(int i, int k)
+    {
+		Range v1 = passList[i];
+		Range v2 = passList[k];
+		Range pass = new Range();
+		{
+			if (v1.Start.X == v2.Start.X)
 			{
-				int y = pass.Start.Y;
-				for (int x = pass.Start.X; x <= pass.End.X; x++)
+				if (v1.Start.Y < v2.Start.Y)
 				{
-					if (map[x, y - 1].GetType() != fillType || map[x, y + 1].GetType() != fillType)
-					{
-						isTrimTarget = false;
-						break;
-					}
+					pass = new Range(v1.Start, v2.Start);
+					passList.Add(pass);
+					return;
+				}
+				if (v1.Start.Y > v2.Start.Y)
+				{
+					pass = new Range(v2.Start, v1.Start);
+					passList.Add(pass);
+					return;
 				}
 			}
-
-			// 削除対象となった通路を削除する
-			if (isTrimTarget)
+			if (v1.Start.X == v2.End.X)
 			{
-				passList.Remove(pass);
-
-				// マップ配列からも削除
-				if (isVertical)
+				if (v1.Start.Y < v2.End.Y)
 				{
-					int x = pass.Start.X;
-					for (int y = pass.Start.Y; y <= pass.End.Y; y++)
-					{
-						map[x, y].SetType(fillType);
-					}
+					pass = new Range(v1.Start, v2.End);
+					passList.Add(pass);
+					return;
 				}
-				else
+				if (v1.Start.Y > v2.End.Y)
 				{
-					int y = pass.Start.Y;
-					for (int x = pass.Start.X; x <= pass.End.X; x++)
-					{
-						map[x, y].SetType(fillType);
-					}
+					pass = new Range(v2.End, v1.Start);
+					passList.Add(pass);
+					return;
+				}
+			}
+			if (v1.End.X == v2.End.X)
+			{
+				if (v1.End.Y < v2.End.Y)
+				{
+					pass = new Range(v1.End, v2.End);
+					passList.Add(pass);
+					return;
+				}
+				if (v1.End.Y > v2.End.Y)
+				{
+					pass = new Range(v2.End, v1.End);
+					passList.Add(pass);
+					return;
 				}
 			}
 		}
-		/**/
-
-		// 外周に接している通路を別の通路との接続点まで削除する
-		// 上下基準
-		for (int x = 0; x < mapSizeX - 1; x++)
 		{
-			if (map[x, 0].GetType() != fillType)
+			if (v1.Start.Y == v2.Start.Y)
 			{
-				for (int y = 0; y < mapSizeY; y++)
+				if (v1.Start.X < v2.Start.X)
 				{
-					if (map[x - 1, y].GetType() != fillType || map[x + 1, y].GetType() != fillType)
-					{
-						break;
-					}
-					map[x, y].SetType(fillType);
+					pass = new Range(v1.Start, v2.Start);
+					passList.Add(pass);
+					return;
+				}
+				if (v1.Start.X > v2.Start.X)
+				{
+					pass = new Range(v2.Start, v1.Start);
+					passList.Add(pass);
+					return;
 				}
 			}
-			if (map[x, mapSizeY - 1].GetType() != fillType)
+			if (v1.Start.Y == v2.End.Y)
 			{
-				for (int y = mapSizeY - 1; y >= 0; y--)
+				if (v1.Start.X < v2.End.X)
 				{
-					if (map[x - 1, y].GetType() != fillType || map[x + 1, y].GetType() != fillType)
-					{
-						break;
-					}
-					map[x, y].SetType(fillType);
+					pass = new Range(v1.Start, v2.End);
+					passList.Add(pass);
+					return;
+				}
+				if (v1.Start.X > v2.End.X)
+				{
+					pass = new Range(v2.End, v1.Start);
+					passList.Add(pass);
+					return;
 				}
 			}
-		}
-		// 左右基準
-		for (int y = 0; y < mapSizeY - 1; y++)
-		{
-			if (map[0, y].GetType() != fillType)
+			if (v1.End.Y == v2.End.Y)
 			{
-				for (int x = 0; x < mapSizeY; x++)
+				if (v1.End.X < v2.End.X)
 				{
-					if (map[x, y - 1].GetType() != fillType || map[x, y + 1].GetType() != fillType)
-					{
-						break;
-					}
-					map[x, y].SetType(fillType);
+					pass = new Range(v1.End, v2.End);
+					passList.Add(pass);
+					return;
 				}
-			}
-			if (map[mapSizeX - 1, y].GetType() != fillType)
-			{
-				for (int x = mapSizeX - 1; x >= 0; x--)
+				if (v1.End.X > v2.End.X)
 				{
-					if (map[x, y - 1].GetType() != fillType || map[x, y + 1].GetType() != fillType)
-					{
-						break;
-					}
-					map[x, y].SetType(fillType);
+					pass = new Range(v2.End, v1.End);
+					passList.Add(pass);
+					return;
 				}
 			}
 		}
 	}
 
-	/**
-	 * 隣接タイルのみ壁にする
-	 */
-	private void _adjacentTileOnlyWall(ref Tile[,] map)
+	/// <summary>
+	/// 作成した情報をマップに反映する
+	/// </summary>
+	private void _reflectListIntoMap()
     {
-		for (int x = 1; x < mapSizeX - 1; x++)
+		foreach (Range pass in passList)
         {
-			for (int y = 1; y < mapSizeY - 1; y++)
+			for (int y = pass.Start.Y; y <= pass.End.Y; y++)
             {
-				if (map[x, y].GetType() != TileType.None && map[x, y].GetType() != TileType.Wall)
+				for (int x = pass.Start.X; x <= pass.End.X; x++)
                 {
-					// 上下左右
-					if (map[x - 1, y].GetType() == TileType.None)
-                    {
-						map[x - 1, y].SetType(TileType.Wall);
-                    }
-					if (map[x + 1, y].GetType() == TileType.None)
-					{
-						map[x + 1, y].SetType(TileType.Wall);
-					}
-					if (map[x, y - 1].GetType() == TileType.None)
-					{
-						map[x, y - 1].SetType(TileType.Wall);
-					}
-					if (map[x, y + 1].GetType() == TileType.None)
-					{
-						map[x, y + 1].SetType(TileType.Wall);
-					}
-					// 四隅
-					if (map[x - 1, y - 1].GetType() == TileType.None)
-					{
-						map[x - 1, y - 1].SetType(TileType.Wall);
-					}
-					if (map[x - 1, y + 1].GetType() == TileType.None)
-					{
-						map[x - 1, y + 1].SetType(TileType.Wall);
-					}
-					if (map[x + 1, y - 1].GetType() == TileType.None)
-					{
-						map[x + 1, y - 1].SetType(TileType.Wall);
-					}
-					if (map[x + 1, y + 1].GetType() == TileType.None)
-					{
-						map[x + 1, y + 1].SetType(TileType.Wall);
-					}
-				}
+					map[y, x].SetType(TileType.Pass);
+                }
             }
         }
-    }
+		foreach (Range room in roomList)
+		{
+			for (int y = room.Start.Y; y <= room.End.Y; y++)
+			{
+				for (int x = room.Start.X; x <= room.End.X; x++)
+				{
+					map[y, x].SetType(TileType.Room);
+				}
+			}
+		}
+	}
+
+	private void _adjacentTileOnlyWall()
+    {
+		for (int y = 1; y < mapHeight - 1; y++)
+		{
+			for (int x = 1; x < mapWidth - 1; x++)
+			{
+				if (map[y, x].GetType() != TileType.None && map[y, x].GetType() != TileType.Wall)
+				{
+					// 上下左右
+					if (map[y, x - 1].GetType() == TileType.None)
+					{
+						map[y, x - 1].SetType(TileType.Wall);
+					}
+					if (map[y, x + 1].GetType() == TileType.None)
+					{
+						map[y, x + 1].SetType(TileType.Wall);
+					}
+					if (map[y - 1, x].GetType() == TileType.None)
+					{
+						map[y - 1, x].SetType(TileType.Wall);
+					}
+					if (map[y + 1, x].GetType() == TileType.None)
+					{
+						map[y + 1, x].SetType(TileType.Wall);
+					}
+					// 四隅
+					if (map[y - 1, x - 1].GetType() == TileType.None)
+					{
+						map[y - 1, x - 1].SetType(TileType.Wall);
+					}
+					if (map[y + 1, x - 1].GetType() == TileType.None)
+					{
+						map[y + 1, x - 1].SetType(TileType.Wall);
+					}
+					if (map[y - 1, x + 1].GetType() == TileType.None)
+					{
+						map[y - 1, x + 1].SetType(TileType.Wall);
+					}
+					if (map[y + 1, x + 1].GetType() == TileType.None)
+					{
+						map[y + 1, x + 1].SetType(TileType.Wall);
+					}
+				}
+			}
+		}
+	}
 }

@@ -4,8 +4,6 @@ using UnityEngine;
 
 public abstract class Actor : MonoBehaviour
 {
-    protected Tile[,] map;
-
     private Rigidbody2D rb;
     private BoxCollider2D boxCollider;
 
@@ -14,11 +12,6 @@ public abstract class Actor : MonoBehaviour
     protected bool isMoving = false;
 
     protected Coroutine _moving;
-
-    public void SetMapData(Tile[,] map)
-    {
-        this.map = map;
-    }
 
     protected virtual void Start()
     {

@@ -48,7 +48,7 @@ public class MapCreator : MonoBehaviour
     {
         if (this.generator == null)
         {
-            this.generator = new MapGenerator();
+            this.generator = new MapGenerator(MapSizeX, MapSizeY, MaxRoom);
         }
 
         this.MapDelete();
@@ -69,7 +69,8 @@ public class MapCreator : MonoBehaviour
 
     private void GenerateMap()
     {
-        this.mapData = this.generator.GenerateMap(MapSizeX, MapSizeY, MaxRoom);
+        this.generator.Generate();
+        this.mapData = this.generator.GetMapData();
 
         List<Vector3> floorList = new List<Vector3>();
 
@@ -114,7 +115,6 @@ public class MapCreator : MonoBehaviour
         {
             GameObject.Destroy(obj.gameObject);
         }
-        generator.DeleteMap();
     }
 
     /**
