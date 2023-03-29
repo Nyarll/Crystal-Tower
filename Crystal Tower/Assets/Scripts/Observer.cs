@@ -26,14 +26,17 @@ public class Observer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            ChangeFloor();
+        }
     }
 
     private void Spawn()
     {
         SpawnPlayer();
         SpawnNextFloor();
-       // SpawnEnemies();
+        SpawnEnemies();
     }
 
     private void SpawnPlayer()

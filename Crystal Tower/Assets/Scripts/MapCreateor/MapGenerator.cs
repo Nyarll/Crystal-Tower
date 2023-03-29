@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -224,24 +225,24 @@ public class MapGenerator
 				Range pass = new Range(startX, startY, targetX, endY);
 				passList.Add(pass);
             }
-			if (areaList[i].Start.X > 0)
-            {
-				int targetX = areaList[i].Start.X - 1;
-				Range pass = new Range(targetX, startY, endX, endY);
-				passList.Add(pass);
-            }
 			if (areaList[i].End.Y < mapHeight - 1)
             {
 				int targetY = areaList[i].End.Y + 1;
 				Range pass = new Range(startX, startY, endX, targetY);
 				passList.Add(pass);
-            }
+			}
+			if (areaList[i].Start.X > 0)
+			{
+				int targetX = areaList[i].Start.X - 1;
+				Range pass = new Range(targetX, startY, endX, endY);
+				passList.Add(pass);
+			}
 			if (areaList[i].Start.Y > 0)
             {
 				int targetY = areaList[i].Start.Y - 1;
 				Range pass = new Range(startX, targetY, endX, endY);
 				passList.Add(pass);
-            }
+			}
 			count++;
 		}
     }
@@ -378,6 +379,7 @@ public class MapGenerator
 	/// </summary>
 	private void _reflectListIntoMap()
     {
+		// ’Ê˜H‚©‚ç”½‰f‚·‚é
 		foreach (Range pass in passList)
         {
 			for (int y = pass.Start.Y; y <= pass.End.Y; y++)
@@ -390,9 +392,78 @@ public class MapGenerator
         }
 		foreach (Range room in roomList)
 		{
-			for (int y = room.Start.Y; y <= room.End.Y; y++)
+			try
 			{
-				for (int x = room.Start.X; x <= room.End.X; x++)
+				if (RogueUtils.GetRandomInt(0, 1) == 1)
+				{
+					for (int y = room.Start.Y; y <= room.End.Y; y++)
+					{
+						for (int x = room.Start.X; x <= room.End.X; x++)
+						{
+							map[y, x].SetType(TileType.Room);
+						}
+					}
+				}
+				else
+				{
+					_createCircleRoom(room);
+				}
+			}
+			catch (Exception e)
+            {
+				for (int y = room.Start.Y; y <= room.End.Y; y++)
+				{
+					for (int x = room.Start.X; x <= room.End.X; x++)
+					{
+						map[y, x].SetType(TileType.Room);
+					}
+				}
+			}
+		}
+	}
+
+	private void _createCircleRoom(Range room)
+    {
+		int radius = room.GetWidthY() / 2;
+		Position center = new Position(room.Start.X + (room.GetWidthX() / 2) + 1, room.Start.Y + radius + 1);
+		if (room.GetWidthX() < room.GetWidthY())
+		{
+			radius = room.GetWidthX() / 2;
+			center = new Position(room.Start.X + radius + 1, room.Start.Y + (room.GetWidthY() / 2) + 1);
+		}
+		{
+			int x = radius;
+			int y = 0;
+			int F = -2 * radius + 3;
+			while (x >= y)
+			{
+				map[center.Y + y, center.X + x].SetType(TileType.Room);
+				map[center.Y + y, center.X - x].SetType(TileType.Room);
+				map[center.Y - y, center.X + x].SetType(TileType.Room);
+				map[center.Y - y, center.X - x].SetType(TileType.Room);
+
+				map[center.Y + x, center.X + y].SetType(TileType.Room);
+				map[center.Y + x, center.X - y].SetType(TileType.Room);
+				map[center.Y - x, center.X + y].SetType(TileType.Room);
+				map[center.Y - x, center.X - y].SetType(TileType.Room);
+
+				if (F >= 0)
+				{
+					x--;
+					F -= 4 * x;
+				}
+				y++;
+				F += 4 * y + 2;
+			}
+		}
+		for (int y = room.Start.Y; y < room.End.Y + 2; y++)
+		{
+			for (int x = room.Start.X; x < room.End.X + 2; x++)
+			{
+				int lx = (x - center.X) * (x - center.X);
+				int ly = (y - center.Y) * (y - center.Y);
+				int lr = radius * radius;
+				if (lx + ly < lr)
 				{
 					map[y, x].SetType(TileType.Room);
 				}

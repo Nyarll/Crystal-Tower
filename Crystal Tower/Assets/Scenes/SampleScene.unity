@@ -187,8 +187,8 @@ MonoBehaviour:
   MapSizeY: 64
   MaxRoom: 10
   tilePrefab: {fileID: 2328339555784104485, guid: 5f5f94dfabc84b84ea5a85ef374e30d6, type: 3}
-  enemyNumMin: 5
-  enemyNumMax: 10
+  enemyNumMin: 10
+  enemyNumMax: 20
 --- !u!114 &138936295
 MonoBehaviour:
   m_ObjectHideFlags: 0

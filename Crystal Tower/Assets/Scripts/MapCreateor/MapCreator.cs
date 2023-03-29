@@ -202,6 +202,10 @@ public class MapCreator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 敵スポーンポイントのリストを取得
+    /// </summary>
+    /// <returns></returns>
     public List<Vector3> GetEnemySpawnPointList()
     {
         return enemySpawnList;
