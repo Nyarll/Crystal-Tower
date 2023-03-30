@@ -55,6 +55,7 @@ public class Player : Actor
             if (transform.position.x == other.transform.position.x &&
                 transform.position.y == other.transform.position.y)
             {
+                uiManager.AddLogText("ŠK’i‚ð“¥‚ñ‚¾", LogSystem.LogType.Event);
                 ChangeFloor();
             }
         }

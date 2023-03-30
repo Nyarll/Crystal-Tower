@@ -15,9 +15,14 @@ public class Observer : MonoBehaviour
 
     private MapCreator creator;
 
+    private UIManager uiManager = null;
+
+    int count = 0;
+
     // Start is called before the first frame update
     void Start()
     {
+        this.uiManager = GetComponent<UIManager>();
         this.creator = this.GetComponent<MapCreator>();
         this.creator.Generate();
         Spawn();
@@ -29,6 +34,11 @@ public class Observer : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             ChangeFloor();
+        }
+        if (Input.GetKey(KeyCode.T))
+        {
+            uiManager.AddLogText("(" + count + ")ログテスト <color=red>テスト</color> aaa あああ", LogSystem.LogType.All);
+            count++;
         }
     }
 

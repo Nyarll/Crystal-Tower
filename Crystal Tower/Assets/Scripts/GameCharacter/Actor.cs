@@ -13,8 +13,11 @@ public abstract class Actor : MonoBehaviour
 
     protected Coroutine _moving;
 
+    protected UIManager uiManager = null;
+
     protected virtual void Start()
     {
+        this.uiManager = GameObject.Find("GameObserver").GetComponent<UIManager>();
         this.boxCollider = GetComponent<BoxCollider2D>();
         this.rb = GetComponent<Rigidbody2D>();
         inverseMoveTime = 1f / moveTime;

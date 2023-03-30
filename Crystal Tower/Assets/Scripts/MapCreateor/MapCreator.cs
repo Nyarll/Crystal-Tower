@@ -219,8 +219,11 @@ public class MapCreator : MonoBehaviour
             while (true)
             {
                 spawn = new Position(RogueUtils.GetRandomInt(0, MapSizeX - 1), RogueUtils.GetRandomInt(0, MapSizeY - 1));
+                // 敵同士スポーンポイントの被りなく
+                // プレイヤースポーンと被らず
+                // 部屋か通路に湧く
                 if (!enemySpawnPointList.Contains(spawn) && 
-                    (spawn != this.playerSpawnPoint) &&
+                    (!spawn.Equals(this.playerSpawnPoint)) &&
                     ((this.mapData[spawn.X, spawn.Y].GetType() == TileType.Room) ||
                     (this.mapData[spawn.X, spawn.Y].GetType() == TileType.Pass)))
                 {
