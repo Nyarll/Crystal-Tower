@@ -424,11 +424,11 @@ public class MapGenerator
 
 	private void _createCircleRoom(Range room)
     {
-		int radius = room.GetWidthY() / 2;
+		int radius = (room.GetWidthY() / 2);
 		Position center = new Position(room.Start.X + (room.GetWidthX() / 2) + 1, room.Start.Y + radius + 1);
 		if (room.GetWidthX() < room.GetWidthY())
 		{
-			radius = room.GetWidthX() / 2;
+			radius = (room.GetWidthX() / 2);
 			center = new Position(room.Start.X + radius + 1, room.Start.Y + (room.GetWidthY() / 2) + 1);
 		}
 		{

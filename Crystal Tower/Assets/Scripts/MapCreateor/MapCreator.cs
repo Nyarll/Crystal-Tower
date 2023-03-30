@@ -105,8 +105,39 @@ public class MapCreator : MonoBehaviour
                             break;
                     }
                 }
+                CreateCircumscribedWall(x, y);
             }
         }
+    }
+
+    private void CreateCircumscribedWall(int x, int y)
+    {
+        if (this.mapData[x, 0].GetType() != TileType.None)
+        {
+            CreateWall(x, -1);
+        }
+        if (this.mapData[0, y].GetType() != TileType.None)
+        {
+            CreateWall(-1, y);
+        }
+        if (this.mapData[x, this.MapSizeY - 1].GetType() != TileType.None)
+        {
+            CreateWall(x, this.MapSizeY);
+        }
+        if (this.mapData[this.MapSizeX - 1, y].GetType() != TileType.None)
+        {
+            CreateWall(this.MapSizeX, y);
+        }
+    }
+
+    private void CreateWall(int x, int y)
+    {
+        GameObject obj = Instantiate(tilePrefab, new Vector3(x, y, 1), new Quaternion());
+        obj.transform.parent = this.transform;
+        SpriteRenderer sprite = obj.GetComponent<SpriteRenderer>();
+        obj.layer = LayerMask.NameToLayer("Wall");
+        obj.AddComponent<Wall>();
+        sprite.color = new Color32(64, 32, 0, 255);
     }
 
     private void MapDelete()
