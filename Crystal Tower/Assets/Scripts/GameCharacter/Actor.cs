@@ -111,4 +111,10 @@ public abstract class Actor : MonoBehaviour
         writer.Flush();
         writer.Close();
     }
+
+    public Status GetStatus()
+    {
+        return this.status;
+    }
+
 }

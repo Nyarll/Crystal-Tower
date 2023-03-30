@@ -5,43 +5,45 @@ using UnityEngine;
 [System.Serializable]
 public class Status
 {
+    // 最大ヒットポイント
+    [SerializeField]
+    public int MaxHP = 1;
+
     // ヒットポイント
     [SerializeField]
-    private int Hp = 1;
-    public int HP => Hp;
+    public int HP = 1;
+
+    // 最大マジックポイント
+    [SerializeField]
+    public int MaxMP = 1;
 
     // マジックポイント
     [SerializeField]
-    private int Mp = 1;
-    public int MP => Mp;
+    public int MP = 1;
 
     // 攻撃力
     [SerializeField]
-    private int Atk = 1;
-    public int ATK => Atk;
+    public int ATK = 1;
 
     // 守備力
     [SerializeField]
-    private int Def = 1;
-    public int DEF => Def;
+    public int DEF = 1;
 
     // 魔法攻撃力
     [SerializeField]
-    private int Int = 1;
-    public int INT => Int;
+    public int INT = 1;
 
     // 魔法防御力
     [SerializeField]
-    private int Mind = 1;
-    public int MIND => Mind;
+    public int MIND = 1;
 
     public Status()
     {
-        Hp = 1;
-        Mp = 1;
-        Atk = 1;
-        Def = 1;
-        Int = 1;
-        Mind = 1;
+        HP = 1;
+        MP = 1;
+        ATK = 1;
+        DEF = 1;
+        INT = 1;
+        MIND = 1;
     }
 }

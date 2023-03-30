@@ -15,7 +15,7 @@ public class Player : Actor
 
     private void OnDisable()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -36,6 +36,16 @@ public class Player : Actor
         if (horizontal != 0 || vertical != 0)
         {
             AttemptMove<Wall>(horizontal, vertical);
+        }
+
+        if (status.HP > 0)
+        {
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                uiManager.AddLogText("<color=red>" + 10 + "</color> É_ÉÅÅ[ÉWÇéÛÇØÇΩ", LogSystem.LogType.Event);
+                this.status.HP -= 10;
+                this.status.MP -= 10;
+            }
         }
     }
 
