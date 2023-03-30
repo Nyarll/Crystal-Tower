@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 public abstract class Actor : MonoBehaviour
 {
@@ -15,11 +16,15 @@ public abstract class Actor : MonoBehaviour
 
     protected UIManager uiManager = null;
 
+    [SerializeField]
+    protected Status status;
+
     protected virtual void Start()
     {
         this.uiManager = GameObject.Find("GameObserver").GetComponent<UIManager>();
         this.boxCollider = GetComponent<BoxCollider2D>();
         this.rb = GetComponent<Rigidbody2D>();
+        this.status = new Status();
         inverseMoveTime = 1f / moveTime;
     }
 
@@ -82,4 +87,28 @@ public abstract class Actor : MonoBehaviour
 
 
     protected abstract void OnCantMove<T>(T hitComponent)where T : Component;
+
+    protected void Dead()
+    {
+        GameObject.Destroy(this);
+    }
+
+    // ステータス読み込み
+    protected void StatusImportToJson(string filePath)
+    {
+        StreamReader reader = new StreamReader(Application.dataPath + filePath);
+        string data = reader.ReadToEnd();
+        reader.Close();
+        this.status = JsonUtility.FromJson<Status>(data);
+    }
+
+    // ステータス保存
+    protected void StatusSaveIntoJson(string filePath)
+    {
+        string data = JsonUtility.ToJson(this.status);
+        StreamWriter writer = new StreamWriter(Application.dataPath + filePath, false);
+        writer.Write(data);
+        writer.Flush();
+        writer.Close();
+    }
 }

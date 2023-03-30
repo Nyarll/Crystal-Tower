@@ -9,6 +9,8 @@ public class Player : Actor
     protected override void Start()
     {
         base.Start();
+        StatusImportToJson("/Save/player_status.json");
+        //StatusSaveIntoJson("/Save/player_status.json");
     }
 
     private void OnDisable()
