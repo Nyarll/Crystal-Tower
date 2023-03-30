@@ -6,11 +6,11 @@ public class MapCreator : MonoBehaviour
 {
     // マップサイズ
     [SerializeField]
-    int MapSizeX = 64;
+    public static int MapSizeX = 64;
     
     // マップサイズ
     [SerializeField]
-    int MapSizeY = 64;
+    public static int MapSizeY = 64;
 
     // 最大部屋数
     [SerializeField]
@@ -74,34 +74,47 @@ public class MapCreator : MonoBehaviour
 
         List<Vector3> floorList = new List<Vector3>();
 
-        for (int y = 0; y < this.MapSizeY; y++)
+        GameObject walls = new GameObject("walls");
+        walls.transform.parent = this.gameObject.transform;
+        walls.transform.position = Vector3.zero;
+
+        GameObject rooms = new GameObject("rooms");
+        rooms.transform.parent = this.gameObject.transform;
+        rooms.transform.position = Vector3.zero;
+
+        GameObject routes = new GameObject("routes");
+        routes.transform.parent = this.gameObject.transform;
+        routes.transform.position = Vector3.zero;
+
+        for (int y = 0; y < MapSizeY; y++)
         {
-            for (int x = 0; x < this.MapSizeX; x++)
+            for (int x = 0; x < MapSizeX; x++)
             {
                 if (this.mapData[x, y].GetType() != TileType.None)
                 {
                     GameObject obj = Instantiate(tilePrefab, new Vector3(x, y, 1), new Quaternion());
-                    obj.transform.parent = this.transform;
                     SpriteRenderer sprite = obj.GetComponent<SpriteRenderer>();
 
                     switch (this.mapData[x, y].GetType())
                     {
                         case TileType.Wall:
+                            obj.transform.parent = walls.transform;
                             obj.layer = LayerMask.NameToLayer("Wall");
                             obj.AddComponent<Wall>();
+                            obj.tag = "Wall";
                             sprite.color = new Color32(64, 32, 0, 255);
                             break;
 
                         case TileType.Room:
+                            obj.transform.parent = rooms.transform;
+                            obj.tag = "Room";
                             sprite.color = new Color32(128, 255, 255, 255);
                             break;
 
                         case TileType.Pass:
+                            obj.transform.parent = routes.transform;
+                            obj.tag = "Pass";
                             sprite.color = new Color32(192, 192, 255, 255);
-                            break;
-
-                        default:
-                            sprite.color = new Color32(255, 0, 255, 255);
                             break;
                     }
                 }
@@ -120,20 +133,20 @@ public class MapCreator : MonoBehaviour
         {
             CreateWall(-1, y);
         }
-        if (this.mapData[x, this.MapSizeY - 1].GetType() != TileType.None)
+        if (this.mapData[x, MapSizeY - 1].GetType() != TileType.None)
         {
-            CreateWall(x, this.MapSizeY);
+            CreateWall(x, MapSizeY);
         }
-        if (this.mapData[this.MapSizeX - 1, y].GetType() != TileType.None)
+        if (this.mapData[MapSizeX - 1, y].GetType() != TileType.None)
         {
-            CreateWall(this.MapSizeX, y);
+            CreateWall(MapSizeX, y);
         }
     }
 
     private void CreateWall(int x, int y)
     {
         GameObject obj = Instantiate(tilePrefab, new Vector3(x, y, 1), new Quaternion());
-        obj.transform.parent = this.transform;
+        obj.transform.parent = transform.Find("walls");
         SpriteRenderer sprite = obj.GetComponent<SpriteRenderer>();
         obj.layer = LayerMask.NameToLayer("Wall");
         obj.AddComponent<Wall>();

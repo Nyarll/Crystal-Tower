@@ -13,6 +13,9 @@ public class Observer : MonoBehaviour
     [SerializeField]
     GameObject enemyPrefab;
 
+    [SerializeField]
+    AutoMapping miniMap;
+
     private MapCreator creator;
 
     private UIManager uiManager = null;
@@ -26,6 +29,8 @@ public class Observer : MonoBehaviour
         this.creator = this.GetComponent<MapCreator>();
         this.creator.Generate();
         Spawn();
+
+        miniMap.ResetMap();
     }
 
     // Update is called once per frame
@@ -78,7 +83,7 @@ public class Observer : MonoBehaviour
         this.GetComponent<MapCreator>().Generate();
         DeleteEnemies();
         Spawn();
-        Debug.Log("change floor.");
+        miniMap.ResetMap();
     }
 
     private void DeleteEnemies()
@@ -90,5 +95,10 @@ public class Observer : MonoBehaviour
                 GameObject.Destroy(obj.gameObject);
             }
         }
+    }
+
+    public void Mapping(int x, int y, TileType type)
+    {
+        miniMap.Mapping(x, y, type);
     }
 }

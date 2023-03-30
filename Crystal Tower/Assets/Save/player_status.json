@@ -1,1 +1,10 @@
-{"MaxHP":20,"HP":20,"MaxMP":20,"MP":20,"ATK":1,"DEF":1,"INT":1,"MIND":1}
+{
+   "MaxHP": 40,
+   "HP": 40,
+   "MaxMP": 20,
+   "MP": 20,
+   "ATK": 1,
+   "DEF": 1,
+   "INT": 1,
+   "MIND": 1
+}

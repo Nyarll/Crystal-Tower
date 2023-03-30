@@ -73,6 +73,15 @@ public class Player : Actor
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.tag == "Room" || other.tag == "Pass")
+        {
+            Observer observer = GameObject.Find("GameObserver").GetComponent<Observer>();
+            observer.Mapping((int)transform.position.x, (int)transform.position.y, TileType.Room);
+        }
+    }
+
     private void ChangeFloor()
     {
         StopCoroutine(_moving);
