@@ -5,6 +5,12 @@ using UnityEngine;
 public class AutoMapping : MonoBehaviour
 {
     [SerializeField]
+    private GameObject player;
+
+    [SerializeField]
+    private GameObject miniPlayer;
+
+    [SerializeField]
     private GameObject roads;
 
     [SerializeField]
@@ -22,9 +28,6 @@ public class AutoMapping : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        RectTransform rect = roadImage.GetComponent<RectTransform>();
-        pw = rect.sizeDelta.x;
-        ph = rect.sizeDelta.y;
     }
 
     public void Mapping(int x, int y, TileType type)
@@ -35,7 +38,8 @@ public class AutoMapping : MonoBehaviour
             Debug.Log("mapping");
             map[x, y] = new Tile(type, new Position(x, y));
             GameObject obj = Instantiate(roadImage, roads.transform);
-            obj.GetComponent<RectTransform>().anchoredPosition = new Vector2(x * 10, y * 10);
+            obj.transform.position = 
+                new Vector3(roads.transform.position.x + x, roads.transform.position.y + y, roads.transform.position.z);
         }
     }
 
@@ -60,5 +64,13 @@ public class AutoMapping : MonoBehaviour
     private int ToMirrorX(int xgrid)
     {
         return MapCreator.MapSizeX - xgrid - 1;
+    }
+
+    private void Update()
+    {
+        Vector3 position = new Vector3(this.transform.position.x + player.transform.position.x,
+            this.transform.position.y + player.transform.position.y,
+            miniPlayer.transform.position.z);
+        miniPlayer.transform.position = position;
     }
 }
