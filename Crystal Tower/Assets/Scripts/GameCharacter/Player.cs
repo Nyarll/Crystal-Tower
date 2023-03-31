@@ -77,7 +77,7 @@ public class Player : Actor
         if (other.tag == "Room" || other.tag == "Pass")
         {
             Observer observer = GameObject.Find("GameObserver").GetComponent<Observer>();
-            observer.Mapping((int)transform.position.x, (int)transform.position.y, TileType.Room);
+            observer.Mapping(other.gameObject);
         }
     }
 

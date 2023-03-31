@@ -53,6 +53,15 @@ public class MapGenerator
     }
 
 	/// <summary>
+	/// ルーム情報取得
+	/// </summary>
+	/// <returns></returns>
+	public List<Range> GetRoomData()
+    {
+		return this.roomList;
+    }
+
+	/// <summary>
 	/// マップ生成エントリ
 	/// </summary>
 	public void Generate()

@@ -72,8 +72,6 @@ public class MapCreator : MonoBehaviour
         this.generator.Generate();
         this.mapData = this.generator.GetMapData();
 
-        List<Vector3> floorList = new List<Vector3>();
-
         GameObject walls = new GameObject("walls");
         walls.transform.parent = this.gameObject.transform;
         walls.transform.position = Vector3.zero;
@@ -86,34 +84,39 @@ public class MapCreator : MonoBehaviour
         routes.transform.parent = this.gameObject.transform;
         routes.transform.position = Vector3.zero;
 
+        // ê∂ê¨
         for (int y = 0; y < MapSizeY; y++)
         {
             for (int x = 0; x < MapSizeX; x++)
             {
-                if (this.mapData[x, y].GetType() != TileType.None)
+                if (this.mapData[y, x].GetType() != TileType.None)
                 {
                     GameObject obj = Instantiate(tilePrefab, new Vector3(x, y, 1), new Quaternion());
                     SpriteRenderer sprite = obj.GetComponent<SpriteRenderer>();
 
-                    switch (this.mapData[x, y].GetType())
+                    switch (this.mapData[y, x].GetType())
                     {
                         case TileType.Wall:
                             obj.transform.parent = walls.transform;
                             obj.layer = LayerMask.NameToLayer("Wall");
                             obj.AddComponent<Wall>();
                             obj.tag = "Wall";
+                            obj.name = "WallTile";
                             sprite.color = new Color32(64, 32, 0, 255);
                             break;
 
                         case TileType.Room:
                             obj.transform.parent = rooms.transform;
                             obj.tag = "Room";
+                            obj.name = "RoomTile";
+                            obj.AddComponent<RoomTile>();
                             sprite.color = new Color32(128, 255, 255, 255);
                             break;
 
                         case TileType.Pass:
                             obj.transform.parent = routes.transform;
                             obj.tag = "Pass";
+                            obj.name = "PassTile";
                             sprite.color = new Color32(192, 192, 255, 255);
                             break;
                     }
@@ -121,23 +124,40 @@ public class MapCreator : MonoBehaviour
                 CreateCircumscribedWall(x, y);
             }
         }
+
+        List<Range> roomList = this.generator.GetRoomData();
+        int count = 0;
+        float padding = 0.5f;
+        foreach (Range roomData in roomList)
+        {
+            GameObject room = new GameObject("room" + count);
+            room.tag = "RoomMST";
+            room.transform.parent = rooms.transform;
+            room.transform.position = 
+                new Vector3(roomData.End.X - (roomData.GetWidthX() / 2) + padding,
+                roomData.End.Y - (roomData.GetWidthY() / 2) + padding);
+
+            room.AddComponent<RoomMST>();
+
+            count++;
+        }
     }
 
     private void CreateCircumscribedWall(int x, int y)
     {
-        if (this.mapData[x, 0].GetType() != TileType.None)
+        if (this.mapData[0, x].GetType() != TileType.None)
         {
             CreateWall(x, -1);
         }
-        if (this.mapData[0, y].GetType() != TileType.None)
+        if (this.mapData[y, 0].GetType() != TileType.None)
         {
             CreateWall(-1, y);
         }
-        if (this.mapData[x, MapSizeY - 1].GetType() != TileType.None)
+        if (this.mapData[MapSizeY - 1, x].GetType() != TileType.None)
         {
             CreateWall(x, MapSizeY);
         }
-        if (this.mapData[MapSizeX - 1, y].GetType() != TileType.None)
+        if (this.mapData[y, MapSizeX - 1].GetType() != TileType.None)
         {
             CreateWall(MapSizeX, y);
         }
@@ -170,7 +190,7 @@ public class MapCreator : MonoBehaviour
         do
         {
             spawn = new Position(RogueUtils.GetRandomInt(0, MapSizeX - 1), RogueUtils.GetRandomInt(0, MapSizeY - 1));
-        } while (this.mapData[spawn.X, spawn.Y].GetType() != TileType.Room);
+        } while (this.mapData[spawn.Y, spawn.X].GetType() != TileType.Room);
 
         this.playerSpawnPoint = spawn;
         this.playerSpawn = new Vector3(spawn.X, spawn.Y, 0);
@@ -194,7 +214,7 @@ public class MapCreator : MonoBehaviour
         do
         {
             spawn = new Position(RogueUtils.GetRandomInt(0, MapSizeX - 1), RogueUtils.GetRandomInt(0, MapSizeY - 1));
-        } while ((this.mapData[spawn.X, spawn.Y].GetType() != TileType.Room) || (spawn == this.playerSpawnPoint));
+        } while ((this.mapData[spawn.Y, spawn.X].GetType() != TileType.Room) || (spawn == this.playerSpawnPoint));
 
         this.nextFloorSpawnPoint = spawn;
         this.nextFloorSpawn = new Vector3(spawn.X, spawn.Y, 0);
@@ -224,6 +244,7 @@ public class MapCreator : MonoBehaviour
         }
         enemySpawnList.Clear();
         enemySpawnPointList.Clear();
+
         // ÉXÉ|Å[ÉìÇ≥ÇπÇÈEnemyÇÃêî
         int num = RogueUtils.GetRandomInt(enemyNumMin, enemyNumMax);
         for (int i = 0; i < num; i++)
@@ -237,8 +258,8 @@ public class MapCreator : MonoBehaviour
                 // ïîâÆÇ©í òHÇ…óNÇ≠
                 if (!enemySpawnPointList.Contains(spawn) && 
                     (!spawn.Equals(this.playerSpawnPoint)) &&
-                    ((this.mapData[spawn.X, spawn.Y].GetType() == TileType.Room) ||
-                    (this.mapData[spawn.X, spawn.Y].GetType() == TileType.Pass)))
+                    ((this.mapData[spawn.Y, spawn.X].GetType() == TileType.Room) ||
+                    (this.mapData[spawn.Y, spawn.X].GetType() == TileType.Pass)))
                 {
                     enemySpawnPointList.Add(spawn);
                     enemySpawnList.Add(new Vector3(spawn.X, spawn.Y, 0));

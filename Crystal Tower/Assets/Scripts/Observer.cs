@@ -68,12 +68,15 @@ public class Observer : MonoBehaviour
     private void SpawnEnemies()
     {
         List<Vector3> spawn = creator.GetEnemySpawnPointList();
+        GameObject enemies = new GameObject("enemies");
+        enemies.transform.parent = this.transform;
+        enemies.transform.position = Vector3.zero;
         foreach (Vector3 p in spawn)
         {
             GameObject obj = Instantiate(enemyPrefab, p, new Quaternion());
             obj.layer = LayerMask.NameToLayer("Entity");
             obj.tag = "Enemy";
-            obj.transform.parent = this.transform;
+            obj.transform.parent = enemies.transform;
         }
     }
 
@@ -97,8 +100,15 @@ public class Observer : MonoBehaviour
         }
     }
 
-    public void Mapping(int x, int y, TileType type)
+    public void Mapping(GameObject obj)
     {
-        miniMap.Mapping(x, y, type);
+        if (obj.tag == "Room")
+        {
+            miniMap.InRoom(obj.transform.parent.gameObject);
+        }
+        else if (obj.tag == "Pass")
+        {
+            miniMap.Mapping((int)obj.transform.position.x, (int)obj.transform.position.y, TileType.Room);
+        }
     }
 }

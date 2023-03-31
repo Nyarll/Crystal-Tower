@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class AutoMapping : MonoBehaviour
 {
@@ -32,10 +33,8 @@ public class AutoMapping : MonoBehaviour
 
     public void Mapping(int x, int y, TileType type)
     {
-        Debug.Log("mapping");
         if (map[x, y] == null && (type == TileType.Room || type == TileType.Pass))
         {
-            Debug.Log("mapping");
             map[x, y] = new Tile(type, new Position(x, y));
             GameObject obj = Instantiate(roadImage, roads.transform);
             obj.transform.position = 
@@ -58,7 +57,7 @@ public class AutoMapping : MonoBehaviour
             Destroy(items.transform.GetChild(i).gameObject);
         }
         map = new Tile[MapCreator.MapSizeX, MapCreator.MapSizeY];
-        GetComponent<RectTransform>().sizeDelta = new Vector2(MapCreator.MapSizeX * pw, MapCreator.MapSizeY * ph);
+        //GetComponent<RectTransform>().sizeDelta = new Vector2(MapCreator.MapSizeX * pw, MapCreator.MapSizeY * ph);
     }
 
     private int ToMirrorX(int xgrid)
@@ -72,5 +71,30 @@ public class AutoMapping : MonoBehaviour
             this.transform.position.y + player.transform.position.y,
             miniPlayer.transform.position.z);
         miniPlayer.transform.position = position;
+    }
+
+    /// <summary>
+    /// •”‰®‚É“ü‚Á‚½‚Æ‚«‚ÉŒÄ‚Ô
+    /// </summary>
+    /// <param name="roomMst"></param>
+    public void InRoom(GameObject roomMst)
+    {
+        try
+        {
+            var mst = roomMst.GetComponent<RoomMST>();
+            if (!mst.isEnter())
+            {
+                mst.Enter();
+                foreach (Transform child in roomMst.transform)
+                {
+                    GameObject obj = child.gameObject;
+                    this.Mapping((int)obj.transform.position.x, (int)obj.transform.position.y, TileType.Room);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
     }
 }
