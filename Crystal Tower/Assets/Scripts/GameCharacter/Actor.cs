@@ -117,4 +117,31 @@ public abstract class Actor : MonoBehaviour
         return this.status;
     }
 
+    protected bool DamageHP(int damage)
+    {
+        if (damage <= 0)
+        {
+            return false;
+        }
+        if (this.status.HP <= 0)
+        {
+            return false;
+        }
+        this.status.HP -= damage;
+        return true;
+    }
+
+    protected bool DamageMP(int damage)
+    {
+        if (damage <= 0)
+        {
+            return false;
+        }
+        if (this.status.MP <= 0)
+        {
+            return false;
+        }
+        this.status.MP -= damage;
+        return true;
+    }
 }

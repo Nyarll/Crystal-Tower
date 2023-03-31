@@ -42,9 +42,8 @@ public class Player : Actor
         {
             if (Input.GetKeyDown(KeyCode.G))
             {
-                uiManager.AddLogText("<color=red>" + 10 + "</color> ダメージを受けた", LogSystem.LogType.Event);
-                this.status.HP -= 10;
-                this.status.MP -= 10;
+                DamageHP(10);
+                DamageMP(10);
             }
         }
     }
@@ -89,5 +88,21 @@ public class Player : Actor
         Observer observer = GameObject.Find("GameObserver").GetComponent<Observer>();
         observer.ChangeFloor();
         StartCoroutine(SmoothMovement(transform.position));
+    }
+
+    private void DamageHP(int damage)
+    {
+        if (base.DamageHP(damage))
+        {
+            uiManager.AddLogText(status.Name + "は <color=red>" + damage + "</color> ダメージを受けた");
+        }
+    }
+
+    private void DamageMP(int damage)
+    {
+        if (base.DamageMP(damage))
+        {
+            uiManager.AddLogText(status.Name + "は <color=red>" + damage + "</color> MPを失った");
+        }
     }
 }

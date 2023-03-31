@@ -1,4 +1,5 @@
 {
+   "Name": "Player",
    "MaxHP": 40,
    "HP": 40,
    "MaxMP": 20,

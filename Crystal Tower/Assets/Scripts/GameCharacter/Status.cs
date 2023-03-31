@@ -5,6 +5,10 @@ using UnityEngine;
 [System.Serializable]
 public class Status
 {
+    // 名前
+    [SerializeField]
+    public string Name = "Actor";
+
     // 最大ヒットポイント
     [SerializeField]
     public int MaxHP = 1;
@@ -39,6 +43,7 @@ public class Status
 
     public Status()
     {
+        Name = "Actor";
         HP = 1;
         MP = 1;
         ATK = 1;
