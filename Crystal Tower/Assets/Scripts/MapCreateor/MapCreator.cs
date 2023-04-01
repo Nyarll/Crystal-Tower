@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class MapCreator : MonoBehaviour
 {
     // マップサイズ
     [SerializeField]
     public static int MapSizeX = 64;
-    
+
     // マップサイズ
     [SerializeField]
     public static int MapSizeY = 64;
@@ -16,9 +17,25 @@ public class MapCreator : MonoBehaviour
     [SerializeField]
     int MaxRoom = 10;
 
-    // タイル
+    // 壁のタイルマップ
     [SerializeField]
-    GameObject tilePrefab;
+    Tilemap tilemap_walls;
+
+    // 床のタイルマップ
+    [SerializeField]
+    Tilemap floor_tilemap;
+
+    // 壁のタイル
+    [SerializeField]
+    UnityEngine.Tilemaps.Tile wall;
+
+    // 部屋のタイル
+    [SerializeField]
+    UnityEngine.Tilemaps.Tile room;
+
+    // 通路のタイル
+    [SerializeField]
+    UnityEngine.Tilemaps.Tile pass;
 
     [SerializeField]
     int enemyNumMin = 5;
@@ -72,17 +89,18 @@ public class MapCreator : MonoBehaviour
         this.generator.Generate();
         this.mapData = this.generator.GetMapData();
 
-        GameObject walls = new GameObject("walls");
-        walls.transform.parent = this.gameObject.transform;
-        walls.transform.position = Vector3.zero;
+        /**/
+        List<Range> roomList = this.generator.GetRoomData();
 
-        GameObject rooms = new GameObject("rooms");
-        rooms.transform.parent = this.gameObject.transform;
-        rooms.transform.position = Vector3.zero;
-
-        GameObject routes = new GameObject("routes");
-        routes.transform.parent = this.gameObject.transform;
-        routes.transform.position = Vector3.zero;
+        for (int i = 0; i < roomList.Count; i++)
+        {
+            GameObject roomObject = new GameObject("room" + i);
+            roomObject.transform.parent = tilemap_walls.transform.parent;
+            roomObject.AddComponent<UnityEngine.Tilemaps.Tilemap>();
+            roomObject.AddComponent<UnityEngine.Tilemaps.TilemapRenderer>();
+            roomObject.AddComponent<UnityEngine.Tilemaps.TilemapCollider2D>();
+        }
+        /**/
 
         // 生成
         for (int y = 0; y < MapSizeY; y++)
@@ -91,55 +109,23 @@ public class MapCreator : MonoBehaviour
             {
                 if (this.mapData[y, x].GetType() != TileType.None)
                 {
-                    GameObject obj = Instantiate(tilePrefab, new Vector3(x, y, 1), new Quaternion());
-                    SpriteRenderer sprite = obj.GetComponent<SpriteRenderer>();
-
                     switch (this.mapData[y, x].GetType())
                     {
                         case TileType.Wall:
-                            obj.transform.parent = walls.transform;
-                            obj.layer = LayerMask.NameToLayer("Wall");
-                            obj.AddComponent<Wall>();
-                            obj.tag = "Wall";
-                            obj.name = "WallTile";
-                            sprite.color = new Color32(64, 32, 0, 255);
+                            tilemap_walls.SetTile(new Vector3Int(x, y, 0), wall);
                             break;
-
+                        /**/
                         case TileType.Room:
-                            obj.transform.parent = rooms.transform;
-                            obj.tag = "Room";
-                            obj.name = "RoomTile";
-                            obj.AddComponent<RoomTile>();
-                            sprite.color = new Color32(128, 255, 255, 255);
+                            floor_tilemap.SetTile(new Vector3Int(x, y, 0), room);
                             break;
-
+                        /**/
                         case TileType.Pass:
-                            obj.transform.parent = routes.transform;
-                            obj.tag = "Pass";
-                            obj.name = "PassTile";
-                            sprite.color = new Color32(192, 192, 255, 255);
+                            floor_tilemap.SetTile(new Vector3Int(x, y, 0), pass);
                             break;
                     }
                 }
                 CreateCircumscribedWall(x, y);
             }
-        }
-
-        List<Range> roomList = this.generator.GetRoomData();
-        int count = 0;
-        float padding = 0.5f;
-        foreach (Range roomData in roomList)
-        {
-            GameObject room = new GameObject("room" + count);
-            room.tag = "RoomMST";
-            room.transform.parent = rooms.transform;
-            room.transform.position = 
-                new Vector3(roomData.End.X - (roomData.GetWidthX() / 2) + padding,
-                roomData.End.Y - (roomData.GetWidthY() / 2) + padding);
-
-            room.AddComponent<RoomMST>();
-
-            count++;
         }
     }
 
@@ -165,20 +151,13 @@ public class MapCreator : MonoBehaviour
 
     private void CreateWall(int x, int y)
     {
-        GameObject obj = Instantiate(tilePrefab, new Vector3(x, y, 1), new Quaternion());
-        obj.transform.parent = transform.Find("walls");
-        SpriteRenderer sprite = obj.GetComponent<SpriteRenderer>();
-        obj.layer = LayerMask.NameToLayer("Wall");
-        obj.AddComponent<Wall>();
-        sprite.color = new Color32(64, 32, 0, 255);
+        tilemap_walls.SetTile(new Vector3Int(x, y, 0), wall);
     }
 
     private void MapDelete()
     {
-        foreach (Transform obj in gameObject.transform)
-        {
-            GameObject.Destroy(obj.gameObject);
-        }
+        tilemap_walls.ClearAllTiles();
+        floor_tilemap.ClearAllTiles();
     }
 
     /**
@@ -193,7 +172,7 @@ public class MapCreator : MonoBehaviour
         } while (this.mapData[spawn.Y, spawn.X].GetType() != TileType.Room);
 
         this.playerSpawnPoint = spawn;
-        this.playerSpawn = new Vector3(spawn.X, spawn.Y, 0);
+        this.playerSpawn = new Vector3(spawn.X + 0.5f, spawn.Y + 0.5f, 0);
     }
 
     /// <summary>
@@ -217,7 +196,7 @@ public class MapCreator : MonoBehaviour
         } while ((this.mapData[spawn.Y, spawn.X].GetType() != TileType.Room) || (spawn == this.playerSpawnPoint));
 
         this.nextFloorSpawnPoint = spawn;
-        this.nextFloorSpawn = new Vector3(spawn.X, spawn.Y, 0);
+        this.nextFloorSpawn = new Vector3(spawn.X + 0.5f, spawn.Y + 0.5f, 0);
     }
 
     /// <summary>
@@ -238,7 +217,7 @@ public class MapCreator : MonoBehaviour
         {
             enemySpawnList = new List<Vector3>();
         }
-        if(enemySpawnPointList == null)
+        if (enemySpawnPointList == null)
         {
             enemySpawnPointList = new List<Position>();
         }
@@ -256,13 +235,13 @@ public class MapCreator : MonoBehaviour
                 // 敵同士スポーンポイントの被りなく
                 // プレイヤースポーンと被らず
                 // 部屋か通路に湧く
-                if (!enemySpawnPointList.Contains(spawn) && 
+                if (!enemySpawnPointList.Contains(spawn) &&
                     (!spawn.Equals(this.playerSpawnPoint)) &&
                     ((this.mapData[spawn.Y, spawn.X].GetType() == TileType.Room) ||
                     (this.mapData[spawn.Y, spawn.X].GetType() == TileType.Pass)))
                 {
                     enemySpawnPointList.Add(spawn);
-                    enemySpawnList.Add(new Vector3(spawn.X, spawn.Y, 0));
+                    enemySpawnList.Add(new Vector3(spawn.X + 0.5f, spawn.Y + 0.5f, 0));
                     break;
                 }
             }

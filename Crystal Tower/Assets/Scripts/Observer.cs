@@ -14,7 +14,7 @@ public class Observer : MonoBehaviour
     GameObject enemyPrefab;
 
     [SerializeField]
-    AutoMapping miniMap;
+    AutoMapping mapping;
 
     private MapCreator creator;
 
@@ -29,8 +29,6 @@ public class Observer : MonoBehaviour
         this.creator = this.GetComponent<MapCreator>();
         this.creator.Generate();
         Spawn();
-
-        miniMap.ResetMap();
     }
 
     // Update is called once per frame
@@ -85,30 +83,29 @@ public class Observer : MonoBehaviour
         this.GetComponent<SequenceManager>().ChangeCurrentSequence(Sequence.EndPhase);
         this.GetComponent<MapCreator>().Generate();
         DeleteEnemies();
+        mapping.ResetMap();
         Spawn();
-        miniMap.ResetMap();
     }
 
     private void DeleteEnemies()
     {
-        foreach (Transform obj in gameObject.transform)
+        DeleteGameObjects(this.transform, "Enemy");
+    }
+
+    private void DeleteGameObjects(Transform root, string tag)
+    {
+        foreach (Transform obj in root)
         {
-            if (obj.gameObject.tag == "Enemy")
+            DeleteGameObjects(obj, tag);
+            if (obj.tag == tag)
             {
                 GameObject.Destroy(obj.gameObject);
             }
         }
     }
 
-    public void Mapping(GameObject obj)
+    public void Mapping(int x, int y)
     {
-        if (obj.tag == "Room")
-        {
-            miniMap.InRoom(obj.transform.parent.gameObject);
-        }
-        else if (obj.tag == "Pass")
-        {
-            miniMap.Mapping((int)obj.transform.position.x, (int)obj.transform.position.y, TileType.Room);
-        }
+        mapping.Mapping(x, y, TileType.Room);
     }
 }

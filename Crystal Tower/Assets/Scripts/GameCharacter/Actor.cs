@@ -16,6 +16,8 @@ public abstract class Actor : MonoBehaviour
 
     protected UIManager uiManager = null;
 
+    protected Vector2 direction;
+
     [SerializeField]
     protected Status status;
 
@@ -26,12 +28,15 @@ public abstract class Actor : MonoBehaviour
         this.rb = GetComponent<Rigidbody2D>();
         this.status = new Status();
         inverseMoveTime = 1f / moveTime;
+
+        direction = Vector2.down;
     }
 
     protected bool Move(int xDir, int yDir, out RaycastHit2D hit)
     {
         Vector2 start = transform.position;
-        Vector2 end = start + new Vector2(xDir, yDir);
+        direction = new Vector2(xDir, yDir);
+        Vector2 end = start + direction;
 
         int layerObjects = LayerMask.GetMask(new string[] { "Wall", "Entity" });
 

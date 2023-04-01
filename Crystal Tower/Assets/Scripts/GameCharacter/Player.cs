@@ -46,6 +46,8 @@ public class Player : Actor
                 DamageMP(10);
             }
         }
+        Observer observer = GameObject.Find("GameObserver").GetComponent<Observer>();
+        observer.Mapping((int)this.transform.position.x, (int)this.transform.position.y);
     }
 
     protected override void AttemptMove<T>(int xDir, int yDir)
@@ -74,10 +76,11 @@ public class Player : Actor
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        Debug.Log("Tag : " + other.tag + "Position : " + other.gameObject.transform.position);
         if (other.tag == "Room" || other.tag == "Pass")
         {
-            Observer observer = GameObject.Find("GameObserver").GetComponent<Observer>();
-            observer.Mapping(other.gameObject);
+            //Observer observer = GameObject.Find("GameObserver").GetComponent<Observer>();
+            //observer.Mapping(other.gameObject);
         }
     }
 

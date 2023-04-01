@@ -8,7 +8,6 @@ public class RoomMST : MonoBehaviour
 
     public void Enter()
     {
-        Debug.Log("“üŽº");
         is_enter = true;
     }
 
