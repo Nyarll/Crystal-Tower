@@ -61,6 +61,11 @@ public class MapGenerator
 		return this.roomList;
     }
 
+	public List<Range> GetAreaData()
+    {
+		return this.areaList;
+    }
+
 	/// <summary>
 	/// マップ生成エントリ
 	/// </summary>
@@ -399,6 +404,7 @@ public class MapGenerator
                 }
             }
         }
+		int count = 0;
 		foreach (Range room in roomList)
 		{
 			try
@@ -410,12 +416,13 @@ public class MapGenerator
 						for (int x = room.Start.X; x <= room.End.X; x++)
 						{
 							map[y, x].SetType(TileType.Room);
+							map[y, x].SetRoomNumber(count);
 						}
 					}
 				}
 				else
 				{
-					_createCircleRoom(room);
+					_createCircleRoom(room, count);
 				}
 			}
 			catch (Exception e)
@@ -425,13 +432,15 @@ public class MapGenerator
 					for (int x = room.Start.X; x <= room.End.X; x++)
 					{
 						map[y, x].SetType(TileType.Room);
+						map[y, x].SetRoomNumber(count);
 					}
 				}
 			}
+			count++;
 		}
 	}
 
-	private void _createCircleRoom(Range room)
+	private void _createCircleRoom(Range room, int roomNumber)
     {
 		int radius = (room.GetWidthY() / 2);
 		Position center = new Position(room.Start.X + (room.GetWidthX() / 2) + 1, room.Start.Y + radius + 1);
@@ -456,6 +465,16 @@ public class MapGenerator
 				map[center.Y - x, center.X + y].SetType(TileType.Room);
 				map[center.Y - x, center.X - y].SetType(TileType.Room);
 
+				map[center.Y + y, center.X + x].SetRoomNumber(roomNumber);
+				map[center.Y + y, center.X - x].SetRoomNumber(roomNumber);
+				map[center.Y - y, center.X + x].SetRoomNumber(roomNumber);
+				map[center.Y - y, center.X - x].SetRoomNumber(roomNumber);
+
+				map[center.Y + x, center.X + y].SetRoomNumber(roomNumber);
+				map[center.Y + x, center.X - y].SetRoomNumber(roomNumber);
+				map[center.Y - x, center.X + y].SetRoomNumber(roomNumber);
+				map[center.Y - x, center.X - y].SetRoomNumber(roomNumber);
+
 				if (F >= 0)
 				{
 					x--;
@@ -475,6 +494,7 @@ public class MapGenerator
 				if (lx + ly < lr)
 				{
 					map[y, x].SetType(TileType.Room);
+					map[y, x].SetRoomNumber(roomNumber);
 				}
 			}
 		}

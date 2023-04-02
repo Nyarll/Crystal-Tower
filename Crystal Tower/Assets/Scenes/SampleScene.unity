@@ -1043,7 +1043,7 @@ MonoBehaviour:
   player: {fileID: 247956816}
   miniPlayer: {fileID: 1320229449}
   mappingTilemap: {fileID: 888770388}
-  floorTile: {fileID: 11400000, guid: f2f45f56bca1ad04c983f3eccc33f5a1, type: 2}
+  floorTile: {fileID: 11400000, guid: 6347f7d558789c246bf52b897b84e939, type: 2}
 --- !u!1 &142156933
 GameObject:
   m_ObjectHideFlags: 0
@@ -2350,7 +2350,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 30461508}
   m_Direction: 0
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.9999999
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -3386,7 +3386,7 @@ GameObject:
   - component: {fileID: 1170760947}
   m_Layer: 7
   m_Name: Walls
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3416,7 +3416,7 @@ TilemapCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
@@ -3774,7 +3774,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1320229449}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4017,7 +4017,7 @@ GameObject:
   - component: {fileID: 1677910202}
   m_Layer: 0
   m_Name: Floor
-  m_TagString: Untagged
+  m_TagString: Pass
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

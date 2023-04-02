@@ -45,6 +45,8 @@ public class MapCreator : MonoBehaviour
 
     private Tile[,] mapData;
 
+    private List<GameObject> roomTilemapList;
+
     private Position playerSpawnPoint;
     private Vector3 playerSpawn;
 
@@ -91,14 +93,31 @@ public class MapCreator : MonoBehaviour
 
         /**/
         List<Range> roomList = this.generator.GetRoomData();
+        List<Range> areaList = this.generator.GetAreaData();
 
         for (int i = 0; i < roomList.Count; i++)
         {
             GameObject roomObject = new GameObject("room" + i);
+            roomObject.tag = "Room";
             roomObject.transform.parent = tilemap_walls.transform.parent;
-            roomObject.AddComponent<UnityEngine.Tilemaps.Tilemap>();
+            var room_tilemap = roomObject.AddComponent<UnityEngine.Tilemaps.Tilemap>();
             roomObject.AddComponent<UnityEngine.Tilemaps.TilemapRenderer>();
-            roomObject.AddComponent<UnityEngine.Tilemaps.TilemapCollider2D>();
+            var collider = roomObject.AddComponent<UnityEngine.Tilemaps.TilemapCollider2D>();
+            collider.isTrigger = true;
+
+            Range areaRange = areaList[i];
+            
+            for (int y = 0; y < MapSizeY; y++)
+            {
+                for (int x = 0; x < MapSizeX; x++)
+                {
+                    if (this.mapData[y, x].GetRoomNumber() == i)
+                    {
+                        room_tilemap.SetTile(new Vector3Int(x, y, 0), room);
+                    }
+                }
+            }
+            roomTilemapList.Add(roomObject);
         }
         /**/
 
@@ -116,7 +135,7 @@ public class MapCreator : MonoBehaviour
                             break;
                         /**/
                         case TileType.Room:
-                            floor_tilemap.SetTile(new Vector3Int(x, y, 0), room);
+                            //floor_tilemap.SetTile(new Vector3Int(x, y, 0), room);
                             break;
                         /**/
                         case TileType.Pass:
@@ -156,8 +175,20 @@ public class MapCreator : MonoBehaviour
 
     private void MapDelete()
     {
+        if (roomTilemapList == null)
+        {
+            roomTilemapList = new List<GameObject>();
+            roomTilemapList.Clear();
+        }
         tilemap_walls.ClearAllTiles();
         floor_tilemap.ClearAllTiles();
+
+        foreach(GameObject tilemap in roomTilemapList)
+        {
+            tilemap.GetComponent<UnityEngine.Tilemaps.Tilemap>().ClearAllTiles();
+            Destroy(tilemap);
+        }
+        roomTilemapList.Clear();
     }
 
     /**

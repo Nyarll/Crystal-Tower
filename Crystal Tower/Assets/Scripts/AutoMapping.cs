@@ -22,23 +22,22 @@ public class AutoMapping : MonoBehaviour
     private float pw, ph;
     private Tile[,] map;
 
-    public void Mapping(int x, int y, TileType type)
+    public void Mapping(int x, int y)
     {
         mappingTilemap.SetTile(new Vector3Int(x, y, 0), floorTile);
+    }
 
-        if ((type == TileType.Room || type == TileType.Pass))
+    public void InRoomMapping(GameObject roomObject)
+    {
+        Tilemap roomTilemap = roomObject.GetComponent<Tilemap>();
+        foreach (var position in roomTilemap.cellBounds.allPositionsWithin)
         {
-            //mappingTilemap.SetTile(new Vector3Int(x, y, 0), floorTile);
+            Vector3Int cellPosition = new Vector3Int(position.x, position.y, position.z);
+            if (roomTilemap.HasTile(cellPosition))
+            {
+                mappingTilemap.SetTile(cellPosition, floorTile);
+            }
         }
-        /**
-        if (map[x, y] == null && (type == TileType.Room || type == TileType.Pass))
-        {
-            map[x, y] = new Tile(type, new Position(x, y));
-            GameObject obj = Instantiate(roadImage, roads.transform);
-            obj.transform.position = 
-                new Vector3(roads.transform.position.x + x, roads.transform.position.y + y, roads.transform.position.z);
-        }
-        /**/
     }
 
     public void ResetMap()

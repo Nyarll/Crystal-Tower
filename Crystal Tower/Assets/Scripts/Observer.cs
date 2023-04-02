@@ -106,6 +106,11 @@ public class Observer : MonoBehaviour
 
     public void Mapping(int x, int y)
     {
-        mapping.Mapping(x, y, TileType.Room);
+        mapping.Mapping(x, y);
+    }
+
+    public void InRoomMapping(GameObject roomObject)
+    {
+        mapping.InRoomMapping(roomObject);
     }
 }

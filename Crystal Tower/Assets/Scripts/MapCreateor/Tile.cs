@@ -14,6 +14,7 @@ public class Tile
 {
     private TileType type;
     private Position position;
+    private int roomNumber = -1;
 
     public Tile(TileType type, Position position)
     {
@@ -29,6 +30,16 @@ public class Tile
     public TileType GetType()
     {
         return this.type;
+    }
+
+    public void SetRoomNumber(int roomNumber)
+    {
+        this.roomNumber = roomNumber;
+    }
+
+    public int GetRoomNumber()
+    {
+        return this.roomNumber;
     }
 
     public void SetPosition(int x, int y)
