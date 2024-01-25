@@ -1,6 +1,5 @@
-
-# Created by https://www.toptal.com/developers/gitignore/api/unity,csharp
-# Edit at https://www.toptal.com/developers/gitignore?templates=unity,csharp
+# Created by https://www.toptal.com/developers/gitignore/api/csharp,unity,visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=csharp,unity,visualstudiocode
 
 ### Csharp ###
 ## Ignore Visual Studio temporary files, build results, and
@@ -405,15 +404,12 @@ FodyWeavers.xsd
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 /[Ll]ibrary/
-[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
 /[Bb]uild/
 /[Bb]uilds/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
-
-/PackageCache/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
@@ -467,4 +463,22 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
-# End of https://www.toptal.com/developers/gitignore/api/unity,csharp
+### VisualStudioCode ###
+!.vscode/*.code-snippets
+
+# Local History for Visual Studio Code
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
+.ionide
+
+# End of https://www.toptal.com/developers/gitignore/api/csharp,unity,visualstudiocode
+Crystal Tower/Library/
+
+Crystal Tower/UserSettings/
+
+Crystal Tower/Temp/

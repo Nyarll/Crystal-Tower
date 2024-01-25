@@ -124,11 +124,7 @@ public abstract class Actor : MonoBehaviour
 
     protected bool DamageHP(int damage)
     {
-        if (damage <= 0)
-        {
-            return false;
-        }
-        if (this.status.HP <= 0)
+        if ((damage <= 0) || (this.status.HP <= 0))
         {
             return false;
         }
@@ -138,15 +134,16 @@ public abstract class Actor : MonoBehaviour
 
     protected bool DamageMP(int damage)
     {
-        if (damage <= 0)
-        {
-            return false;
-        }
-        if (this.status.MP <= 0)
+        if ((damage <= 0) || (this.status.MP <= 0))
         {
             return false;
         }
         this.status.MP -= damage;
         return true;
+    }
+
+    protected virtual void Attack()
+    {
+
     }
 }

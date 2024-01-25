@@ -10,7 +10,9 @@ public class LogSystem : MonoBehaviour
     public enum LogType
     {
         All,
-        Event
+        Event,
+
+        Debug
     }
 
     // ログ出力先テキスト
@@ -52,6 +54,13 @@ public class LogSystem : MonoBehaviour
         {
             case LogType.Event:
                 eventLogs.Add(logText);
+                break;
+
+            case LogType.Debug:
+                Debug.Log(logText);
+                break;
+
+            default:
                 break;
         }
 
